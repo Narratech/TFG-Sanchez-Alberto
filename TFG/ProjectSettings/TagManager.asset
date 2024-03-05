@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Fruta
+  - Ground
+  - Background
+  - GravityObject
+  - comic
+  - paraguas
+  - "c\xF3mic"
+  - ground
+  - mesa
+  - tronco
+  - player
+  - vela
+  - silla
+  - "sof\xE1"
+  - aliado
+  - cofre
+  - porton
+  - linterna
+  - escalera
+  - escalerilla
+  - plataforma
+  - cuchillo
+  - trampa de pinchos
+  - caja
+  - hacha
+  - yunque
+  - escudo
+  - manzana
+  - hoguera
+  - mochila
+  - "espantap\xE1jaros"
+  - bola de pinchos
+  - estatua
+  - "mu\xF1eco de entrenamiento"
+  - leche
+  - pozo
+  - puerta
+  - llave
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - suelo
+  - Water
+  - UI
+  - Backray
+  - lluvia
+  - 
+  - 
+  - Background
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: BackGround
+    uniqueID: 2032243057
+    locked: 0
+  - name: backFront
+    uniqueID: 2013057887
+    locked: 0
+  - name: lluvia
+    uniqueID: 2194929479
+    locked: 0
+  - name: suelo
+    uniqueID: 422766081
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
