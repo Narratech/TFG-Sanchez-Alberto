@@ -51,7 +51,7 @@ TagManager:
   - UI
   - Backray
   - lluvia
-  - 
+  - hidden
   - 
   - Background
   - 
@@ -78,6 +78,12 @@ TagManager:
   m_SortingLayers:
   - name: BackGround
     uniqueID: 2032243057
+    locked: 0
+  - name: BackGroundFront
+    uniqueID: 2705673907
+    locked: 0
+  - name: hidden
+    uniqueID: 2179893163
     locked: 0
   - name: backFront
     uniqueID: 2013057887
