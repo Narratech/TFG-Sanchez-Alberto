@@ -167,7 +167,7 @@ public class TraductionLogic : MonoBehaviour
 
         if (inventory.Count == 0)
         {
-            msg += "Inventario vacío";
+            msg += "Inventario vacío.";
         }
         else
         {
@@ -183,7 +183,7 @@ public class TraductionLogic : MonoBehaviour
     // Creamos el mensaje cuando hace click el jugador, y la corutina para enviarlo a GPT
     private async void buildInteractionMsg(RaycastHit2D hit)
     {
-        string sendMsg = "El jugador ha hecho click en " + hit.collider.gameObject.name + ", en la posición: " + hit.point + "Escóndete en el sofá!";
+        string sendMsg = "El jugador ha hecho click en " + hit.collider.gameObject.name + ", en la posición: " + hit.point;
         Debug.Log(hit.point);
         await SendAndHandleReply(sendMsg);
     }
@@ -326,7 +326,7 @@ public class TraductionLogic : MonoBehaviour
         actionObjectLogic.Add("crecer", Crecer); // HECHO
         actionObjectLogic.Add("explotar", Explotar);
         actionObjectLogic.Add("atacar", Atacar);
-        actionObjectLogic.Add("esconderse", Esconderse);
+        actionObjectLogic.Add("esconderse", Esconderse); // HECHO
         actionObjectLogic.Add("atraer", Atraer); // HECHO
         actionObjectLogic.Add("teletransportar", Teletransportar); // HECHO
         actionObjectLogic.Add("soltar", Soltar);

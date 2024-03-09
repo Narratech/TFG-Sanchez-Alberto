@@ -38,16 +38,31 @@ public class LogicController
             }          
         }
 
-        // Restaurar el orden original
-        for (int i = 0; i < originalOrder.Count; i++)
+        int i = 0;
+        // Recorro de nuevo cada parte del cuerpo de Naeve para devolver el orden relativo de cada parte dentro de la capa. Utilizo un contador para saltarme las partes del cuero que no tienen spriteRenderer y así no saltarno ninguna de las partes del cuerpo que sí lo tienen.
+        foreach (Transform part in bodyParts)
         {
+            // Obtengo el SpriteRenderer y cambio la capa
             bodyParts[i].SetSiblingIndex(originalOrder[i]);
             spriteRenderer = bodyParts[i].GetComponent<SpriteRenderer>();
+
             if (spriteRenderer != null)
             {
                 spriteRenderer.sortingOrder = originalOrder[i];
+                i++;
             }
         }
+
+        // Restaurar el orden original
+        //for (int i = 0; i < originalOrder.Count; i++)
+        //{
+        //    bodyParts[i].SetSiblingIndex(originalOrder[i]);
+        //    spriteRenderer = bodyParts[i].GetComponent<SpriteRenderer>();
+        //    if (spriteRenderer != null)
+        //    {
+        //        spriteRenderer.sortingOrder = originalOrder[i];
+        //    }
+        //}
     }
 
     public List<Transform> getBodyParts()

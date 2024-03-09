@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 055e3516e02840b4ebe7c540b5f98d60
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - BM YEONSUNG
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 2496944c08c0b05489b3e06aacaa2a2e, type: 3}
+  - {fileID: 12800000, guid: 3c95cc94ed441c248b4c31b397f0c5b1, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
