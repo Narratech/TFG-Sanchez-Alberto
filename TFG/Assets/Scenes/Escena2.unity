@@ -911,6 +911,10 @@ PrefabInstance:
       value: Cofre
       objectReference: {fileID: 0}
     - target: {fileID: 1671459498715919559, guid: f98d0f39fcc67a34f844abd8a50f2c03, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1671459498715919559, guid: f98d0f39fcc67a34f844abd8a50f2c03, type: 3}
       propertyPath: m_TagString
       value: cofre
       objectReference: {fileID: 0}
@@ -1575,8 +1579,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
-  m_fontSizeBase: 12
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1611,7 +1615,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -11.151985, y: -37.35952, z: 100.7989, w: 34.43422}
+  m_margin: {x: -91.09254, y: -66.428856, z: 26.308815, w: 21.716442}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2271,8 +2275,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -433.83118, y: -51.0672}
-  m_SizeDelta: {x: -835.019, y: -441.353}
+  m_AnchoredPosition: {x: -698, y: -90}
+  m_SizeDelta: {x: -1375.59, y: -759.55}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &574439704
 MonoBehaviour:
@@ -2509,7 +2513,7 @@ GameObject:
   m_Component:
   - component: {fileID: 691872357}
   - component: {fileID: 691872356}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2555,7 +2559,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 2032243057
-  m_SortingLayer: -4
+  m_SortingLayer: -6
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: cbef2fb8d44aed94297177261be84de5, type: 3}
   m_Color: {r: 0.7264151, g: 0.7264151, b: 0.7264151, a: 1}
@@ -2720,10 +2724,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 739173462}
-  - component: {fileID: 739173461}
   - component: {fileID: 739173460}
   m_Layer: 0
-  m_Name: ChatGPT
+  m_Name: NaeveGPT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2744,23 +2747,6 @@ MonoBehaviour:
   textito: {fileID: 382441524}
   sent: {fileID: 171019112}
   received: {fileID: 480146908}
---- !u!114 &739173461
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 739173459}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83764466e83f8aa40b421e5af75b1b49, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputField: {fileID: 0}
-  button: {fileID: 0}
-  scroll: {fileID: 0}
-  sent: {fileID: 8660877164928630359, guid: 53cd26a6eefa5a74086203cd118a04d3, type: 3}
-  received: {fileID: 961534450149497043, guid: adc0146c2853ed1418133faaf4379eb1, type: 3}
 --- !u!4 &739173462
 Transform:
   m_ObjectHideFlags: 0
@@ -5123,7 +5109,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7535817777252858664, guid: 409b7265903cecb4ebfc175e2aebde19, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6.54
+      value: 11.21
       objectReference: {fileID: 0}
     - target: {fileID: 7535817777252858664, guid: 409b7265903cecb4ebfc175e2aebde19, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5305,7 +5291,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1579245055}
   - component: {fileID: 1579245054}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Porton
   m_TagString: porton
   m_Icon: {fileID: 0}
@@ -12195,7 +12181,7 @@ SpriteRenderer:
   m_Size: {x: 0.62, y: 1.14}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &2097752440
@@ -12391,10 +12377,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1024, y: 768}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3

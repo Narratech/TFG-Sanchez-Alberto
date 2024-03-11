@@ -13,12 +13,9 @@ namespace OpenAI
 {
     public class GPTController : MonoBehaviour
     {
-        [SerializeField] private TMP_Text textito;
-
-        [SerializeField] private RectTransform sent;
-        [SerializeField] private RectTransform received;
-
-        private TraductionLogic traductionRes;
+        [SerializeField] public TMP_Text textito;
+        [SerializeField] public RectTransform sent;
+        [SerializeField] public RectTransform received;
 
         private static GPTController _instance;
 
@@ -38,40 +35,30 @@ namespace OpenAI
             prompt += newPrompt;
         }
 
-        private void Awake()
-        {
-            traductionRes = GameObject.FindObjectOfType<TraductionLogic>();
-
-            if (traductionRes == null)
-            {
-                Debug.LogError("TraductionLogic no encontrado.");
-            }
-        }
-
         public void AppendMessage(string message)
         {
             textito.SetText(message);
         }
 
-        public static GPTController Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    // Si no hay una instancia existente, intenta encontrarla en la escena
-                    _instance = FindObjectOfType<GPTController>();
+        //public static GPTController Instance
+        //{
+        //    get
+        //    {
+        //        if (_instance == null)
+        //        {
+        //            // Si no hay una instancia existente, intenta encontrarla en la escena
+        //            _instance = FindObjectOfType<GPTController>();
 
-                    // Si no se encuentra en la escena, crea una nueva instancia
-                    if (_instance == null)
-                    {
-                        GameObject obj = new GameObject("GPTController");
-                        _instance = obj.AddComponent<GPTController>();
-                    }
-                }
-                return _instance;
-            }
-        }
+        //            // Si no se encuentra en la escena, crea una nueva instancia
+        //            if (_instance == null)
+        //            {
+        //                GameObject obj = new GameObject("GPTController");
+        //                _instance = obj.AddComponent<GPTController>();
+        //            }
+        //        }
+        //        return _instance;
+        //    }
+        //}
 
         public void InitGPT()
         {
@@ -100,13 +87,6 @@ namespace OpenAI
         {
             return actionText;
         }
-
-        public void answerReady(string response/*, string click*/)
-        {
-            // Guardamos la respuesta en ResponseTraduction para parsearla posteriormente
-            traductionRes.SetReply(response);
-        }
-
 
         public async Task<string> SendReply(string text/*, string click*/)
         {

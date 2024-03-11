@@ -8,6 +8,7 @@ using System.Net.NetworkInformation;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using Unity.Collections;
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
@@ -21,6 +22,17 @@ public class TraductionLogic : MonoBehaviour
 
     // Creamos la instancia para utilizar todas las funciones lógicas
     private LogicController logicController = new LogicController();
+
+    //public GameObject gptControllerPrefab;
+
+    //GameObject naeveController;
+    //GameObject errorController;
+    //GameObject resumenController;
+    //GameObject portonController;
+    public GPTController naeveControllerGPT;
+    public GPTController errorControllerGPT;
+    //public GPTController resumenControllerGPT;
+    //public GPTController portonControllerGPT;
 
     public GameObject player;
     public GameObject enemy;
@@ -56,6 +68,8 @@ public class TraductionLogic : MonoBehaviour
     private string naeveText;
 
     private string reply = "";
+    private string errorReply = "";
+
     private Vector2 target;
     private float posX, posY;
     private bool moving;
@@ -105,6 +119,9 @@ public class TraductionLogic : MonoBehaviour
         groundLayerMask = LayerMask.GetMask("suelo");
         logicController.SetBodyParts(player.transform);
         // Obtenermos las capas por defecto de Naeve
+        // Creamos los objetos que serán
+        //InitializeGPTObjects();
+        generateErrorGPT();
     }
 
     private void Update()
@@ -150,6 +167,53 @@ public class TraductionLogic : MonoBehaviour
         }
     }
 
+    //private void InitializeGPTObjects()
+    //{
+    //    naeveController = /*new GameObject("NaeveController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
+    //    //errorController = /*new GameObject("ErrorController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
+    //    //resumenController = /*new GameObject("ResumenController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
+    //    //portonController = /*new GameObject("PortonController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
+
+    //    naeveControllerGPT = naeveController.AddComponent<GPTController>();
+    //    //errorControllerGPT = errorController.AddComponent<GPTController>();
+    //    //resumenControllerGPT = resumenController.AddComponent<GPTController>();
+    //    //portonControllerGPT = portonController.AddComponent<GPTController>();
+
+    //    InitializeGPTComponents(naeveControllerGPT);
+    //    //InitializeGPTComponents(errorControllerGPT);
+    //    //InitializeGPTComponents(resumenControllerGPT);
+    //    //InitializeGPTComponents(portonControllerGPT);
+    //}
+    //private void InitializeGPTComponents(GPTController gptController)
+    //{
+    //    // Buscar el objeto TMP_Text en la escena por su nombre
+    //    GameObject cosa = GameObject.Find("Naeve Chat");
+    //    if (cosa != null )
+    //    {
+    //        Debug.Log("encontrado objeto" + cosa);
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("No encontrado Naeve Chat");
+    //    }
+    //    gptController.textito = GameObject.Find("Naeve Chat").GetComponent<TMP_Text>();
+
+    //    if (gptController.textito == null)
+    //    {
+    //        Debug.Log("No se ha encontrado textito");
+    //    }
+    //    else
+    //    {
+    //        Debug.Log(gptController.textito);
+    //    }
+
+    //    // Buscar el objeto RectTransform en la escena por su nombre
+    //    gptController.sent = GameObject.Find("Sent Message").GetComponent<RectTransform>();
+
+    //    // Buscar el objeto RectTransform en la escena por su nombre
+    //    gptController.received = GameObject.Find("Received Message").GetComponent<RectTransform>();
+    //}
+
     // Función para checkear si Naeve ha tocado ya el suelo y podemos quitar la animación de saltar
     private void CheckGroundedAfterJump()
     {
@@ -158,6 +222,12 @@ public class TraductionLogic : MonoBehaviour
             naeveAnimator.SetBool("isJump", false);
             isJumping = false;
         }
+    }
+
+    private async void generateErrorGPT()
+    {
+        string msg = "Tu única función es ocuparte de la corrección de salidas de otro ChatGPT que actúa como protagonista de un videojuego. De ahora en adelante me referiré a este como «Naeve». \r\n\r\nLa respuesta de «Naeve» será en lenguaje formal listo para ser parseado como acciones en el videojuego. Este lenguaje formal se representará con los siguientes comandos: «[Acción],[Objeto]»,«[Acción],[posiciónX,posiciónY]», «[Acción]» o «[Acción],[Objeto],[Objeto]», dependiendo de la acción. Siendo también válido cualquier número negativo para «posición x» y «posición y».\r\n\r\nA continuación, ejemplos de comandos correctos como referencia: \r\n[coger],[«objeto»]\r\n[mover],[posición X,posición Y]\r\n[transformar],[«objeto/ente»],[«objeto/ente»]\r\n[vibrar],[«objeto/ente»]\r\n[desaparecer],[«objeto/ente»]\r\n[menguar],[«objeto/ente»]\r\n[crecer],[«objeto/ente»]\r\n[explotar],[«objeto/ente»]\r\n[atacar],[«objeto/ente»]\r\n[esconderse],[«objeto»]\r\n[atraer],[«objeto/ente»]\r\n[teletransportar][«objeto/ente»],[posición X,posición Y]\r\n[soltar],[«objeto»*]\r\n[levitar],[«objeto/ente»]\r\n[aparecer],[«objeto»]\r\n[utilizar],[«objeto»],[«objeto/ente»]\r\n[saltar]\r\n[hablar],[«ente»]\r\n[esperar]\r\n[caer],[«objeto»]\r\n[invisibilizar],[«objeto/ente»]\r\n\r\nTu función es corregir las salidas erróneas de «Naeve» teniendo en cuenta este formato estricto.\r\n\r\nTu respuesta será de la forma: [Error],«comando corregido». Sin añadir explicaciones adicionales.\r\n\r\nSi el mensaje comienza con [Debug] contestarás normalmente las dudas del desarrollador. Tu primer mensaje será ignorado.";
+        await SendAndHandleReplyError(msg);
     }
 
     // Construye el prompt cuando aparece el hombre del sombrero
@@ -275,7 +345,7 @@ public class TraductionLogic : MonoBehaviour
 
     private async Task SendAndHandleReply(string msgSend)
     {
-        reply = await GPTController.Instance.SendReply(msgSend);
+        reply = await naeveControllerGPT.SendReply(msgSend);
         //Debug.Log("get answer 1: " + reply);
         while (string.IsNullOrEmpty(reply)) // Esperar hasta que la respuesta no esté vacía
         {
@@ -285,13 +355,25 @@ public class TraductionLogic : MonoBehaviour
         // Parseamos el mensaje y obtenemos por un lado la acción y por el otro el texto en lenguaje natural
         getAction(reply, out actionText, out naeveText);
 
-        GPTController.Instance.AppendMessage(naeveText);
+        naeveControllerGPT.AppendMessage(naeveText);
 
         // Llama a traduce para traducir el mensaje a una acción.
         InterpretString(actionText);
-        GPTController.Instance.UpdateGPT();
+        naeveControllerGPT.UpdateGPT();
         // Resetea reply para futuras solicitudes
         reply = "";
+    }
+
+    private async Task SendAndHandleReplyError(string msg)
+    {
+        errorReply = await errorControllerGPT.SendReply(msg);
+        while (string.IsNullOrEmpty(errorReply)) // Esperar hasta que la respuesta no esté vacía
+        {
+            await Task.Delay(10);
+        }
+        //errorControllerGPT.AppendMessage(msg);
+        errorControllerGPT.UpdateGPT();
+        errorReply = "";
     }
 
     //Este método se llama desde GPTController cuando la respuesta está lista
@@ -370,6 +452,12 @@ public class TraductionLogic : MonoBehaviour
         {
             obj.GetComponent<Rigidbody2D>().WakeUp();
         }
+
+        //Collider collider = obj.GetComponent<Collider>();
+        //if (collider != null)
+        //{
+        //    collider.isTrigger = false;
+        //}
     }
 
     private void Esperar(GameObject obj)
