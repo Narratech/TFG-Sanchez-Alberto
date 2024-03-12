@@ -20,8 +20,10 @@ public class TraductionLogic : MonoBehaviour
     // Desde ChatGPT llamamos a esta función para traducir el mensaje de respuesta. 
     // Desde esta función llamamos a lo que haga falta para ejecutarla. Movimiento...
 
-    // Creamos la instancia para utilizar todas las funciones lógicas
+    // Creamos las instancisa para utilizar todas las funciones lógicas
     private LogicController logicController = new LogicController();
+    private PromptManager promptManager = new PromptManager();
+    private OnClick onClick = new();
 
     //public GameObject gptControllerPrefab;
 
@@ -48,8 +50,6 @@ public class TraductionLogic : MonoBehaviour
 
     public GameObject teleportVFX;
 
-    private OnClick onClick = new();
-
     private Animator naeveAnimator;
 
     // Tags del collider de cada gameobject de la escena
@@ -66,6 +66,9 @@ public class TraductionLogic : MonoBehaviour
 
     private string actionText;
     private string naeveText;
+
+    // Hay que ignorar el primer mensaje de GPT
+    //private bool firstMessage = true;
 
     private string reply = "";
     private string errorReply = "";
@@ -121,7 +124,8 @@ public class TraductionLogic : MonoBehaviour
         // Obtenermos las capas por defecto de Naeve
         // Creamos los objetos que serán
         //InitializeGPTObjects();
-        generateErrorGPT();
+        //GenerateNaeveGPT();
+        GenerateErrorGPT();
     }
 
     private void Update()
@@ -224,10 +228,20 @@ public class TraductionLogic : MonoBehaviour
         }
     }
 
-    private async void generateErrorGPT()
+    //private void GenerateNaeveGPT() 
+    //{
+    //    // Obtenemos nuestro prompt inicial del promptManager
+    //    string prompt = promptManager.getNaevePrompt();
+    //    naeveControllerGPT.SetPrompt(prompt);
+    //    // Delegamos la inicialización en  GPT con el prompt inicial
+    //    //await SendAndHandleReply("");
+    //}
+
+    private async void GenerateErrorGPT()
     {
-        string msg = "Tu única función es ocuparte de la corrección de salidas de otro ChatGPT que actúa como protagonista de un videojuego. De ahora en adelante me referiré a este como «Naeve». \r\n\r\nLa respuesta de «Naeve» será en lenguaje formal listo para ser parseado como acciones en el videojuego. Este lenguaje formal se representará con los siguientes comandos: «[Acción],[Objeto]»,«[Acción],[posiciónX,posiciónY]», «[Acción]» o «[Acción],[Objeto],[Objeto]», dependiendo de la acción. Siendo también válido cualquier número negativo para «posición x» y «posición y».\r\n\r\nA continuación, ejemplos de comandos correctos como referencia: \r\n[coger],[«objeto»]\r\n[mover],[posición X,posición Y]\r\n[transformar],[«objeto/ente»],[«objeto/ente»]\r\n[vibrar],[«objeto/ente»]\r\n[desaparecer],[«objeto/ente»]\r\n[menguar],[«objeto/ente»]\r\n[crecer],[«objeto/ente»]\r\n[explotar],[«objeto/ente»]\r\n[atacar],[«objeto/ente»]\r\n[esconderse],[«objeto»]\r\n[atraer],[«objeto/ente»]\r\n[teletransportar][«objeto/ente»],[posición X,posición Y]\r\n[soltar],[«objeto»*]\r\n[levitar],[«objeto/ente»]\r\n[aparecer],[«objeto»]\r\n[utilizar],[«objeto»],[«objeto/ente»]\r\n[saltar]\r\n[hablar],[«ente»]\r\n[esperar]\r\n[caer],[«objeto»]\r\n[invisibilizar],[«objeto/ente»]\r\n\r\nTu función es corregir las salidas erróneas de «Naeve» teniendo en cuenta este formato estricto.\r\n\r\nTu respuesta será de la forma: [Error],«comando corregido». Sin añadir explicaciones adicionales.\r\n\r\nSi el mensaje comienza con [Debug] contestarás normalmente las dudas del desarrollador. Tu primer mensaje será ignorado.";
-        await SendAndHandleReplyError(msg);
+        string errorPrompt = promptManager.getErrorGPT();
+        errorControllerGPT.SetPrompt(errorPrompt);
+        await SendAndHandleReplyError("");
     }
 
     // Construye el prompt cuando aparece el hombre del sombrero
@@ -351,9 +365,19 @@ public class TraductionLogic : MonoBehaviour
         {
             await Task.Delay(10);
         }
-        // G
+
+        // Comprobamos que el formato sea correcto
+        await SendAndHandleReplyError(reply);
+        //GetErrorReply();
+
         // Parseamos el mensaje y obtenemos por un lado la acción y por el otro el texto en lenguaje natural
         getAction(reply, out actionText, out naeveText);
+
+        //if (firstMessage)
+        //{
+        //    naeveText = "";
+        //    firstMessage = false;
+        //}
 
         naeveControllerGPT.AppendMessage(naeveText);
 
@@ -371,7 +395,7 @@ public class TraductionLogic : MonoBehaviour
         {
             await Task.Delay(10);
         }
-        //errorControllerGPT.AppendMessage(msg);
+        errorControllerGPT.AppendMessage(errorReply);
         errorControllerGPT.UpdateGPT();
         errorReply = "";
     }
@@ -845,6 +869,10 @@ public class TraductionLogic : MonoBehaviour
             //{
             //    ExecuteActionObjectLogic(action, player);
             //}
+        }
+        else if (string.IsNullOrEmpty(inputString))
+        {
+            Debug.Log("No se ha realizado ninguna acción");
         }
         else
         {

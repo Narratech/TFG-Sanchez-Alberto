@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-public class OnClick : MonoBehaviour
+public class OnClick
 {
     private RaycastHit2D hit;
-        public RaycastHit2D GetPositionRay(Vector3 mousePosition)
+    public RaycastHit2D GetPositionRay(Vector3 mousePosition)
     {
         Vector2 rayOrigin = Camera.main.ScreenToWorldPoint(mousePosition);
         Vector2 rayDirection = Vector2.zero;

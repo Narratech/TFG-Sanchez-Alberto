@@ -5,12 +5,13 @@ using UnityEngine;
 
 public class Scene1Script : SceneScript
 {
-    private string promptScene1 = "Escena: «Bosque oscuro. Hay una tormenta. Apareces en la posición (0,0). Hay un paraguas en la posición (22.82,0). Hay un cómic en la posición (10,19.8). Hay un tronco en la posición (58.79,0). Hay un sofá en la posición (46.34,1.5). Hay una mesa en la posición (76.43,0). Hay una vela en la posición (80.5,6.6). Hay una silla en la posición (69,0). Si la posición del objeto no está dada, significa que lo tienes en el inventario a tu disposición.»";
+    private PromptManager promptManager = new PromptManager();
 
     protected override string GetScenePrompt()
     {
+        string prompt = promptManager.getNaevePrompt() + promptManager.getScene1Prompt();
         // Devuelve el prompt específico de la escena 1
-        return promptScene1;
+        return prompt;
     }
     protected override void Start()
     {

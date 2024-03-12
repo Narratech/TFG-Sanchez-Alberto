@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+// Clase para mover el texto de un botón al clickar en este, con el objetivo de que siga la animación del pulsado del botón.
 public class OnClickButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     public TextMeshProUGUI textToMove;
