@@ -40,25 +40,17 @@ namespace OpenAI
             textito.SetText(message);
         }
 
-        //public static GPTController Instance
-        //{
-        //    get
-        //    {
-        //        if (_instance == null)
-        //        {
-        //            // Si no hay una instancia existente, intenta encontrarla en la escena
-        //            _instance = FindObjectOfType<GPTController>();
-
-        //            // Si no se encuentra en la escena, crea una nueva instancia
-        //            if (_instance == null)
-        //            {
-        //                GameObject obj = new GameObject("GPTController");
-        //                _instance = obj.AddComponent<GPTController>();
-        //            }
-        //        }
-        //        return _instance;
-        //    }
-        //}
+        // Función para devolver toda la conversación. La usaré con el GPT de Naeve para mandárselo al GPT resumidor. Comienzo en el mensaje 2 ya que no me interesa volver a mandarle todo el contexto ni la primera respuesta de GPT.
+        public string GetAllPrompts()
+        {
+            string allPrompts = "";
+            for (int i = 2; i < messages.Count; i++)
+            {
+                string part = "Mensaje " + i + ": " + messages[i].Content;
+                allPrompts += part;
+            }
+            return allPrompts;
+        }
 
         public void InitGPT()
         {
@@ -74,11 +66,11 @@ namespace OpenAI
         public void UpdateGPT()
         {
 
-            // Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
-            for (int i = 0; i < messages.Count; i++)
-            {
-                Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
-            }
+            //Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
+            //for (int i = 0; i < messages.Count; i++)
+            //{
+            //    Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
+            //}
 
         }
 
@@ -102,7 +94,7 @@ namespace OpenAI
 
             var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest()
             {
-                Model = "gpt-3.5-turbo-1106",
+                Model = "gpt-3.5-turbo-0125",
                 Messages = messages
                 //Temperature = 0.7f
             }); ;

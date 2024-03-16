@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Collections;
@@ -25,16 +26,10 @@ public class TraductionLogic : MonoBehaviour
     private PromptManager promptManager = new PromptManager();
     private OnClick onClick = new();
 
-    //public GameObject gptControllerPrefab;
-
-    //GameObject naeveController;
-    //GameObject errorController;
-    //GameObject resumenController;
-    //GameObject portonController;
     public GPTController naeveControllerGPT;
     public GPTController errorControllerGPT;
     //public GPTController resumenControllerGPT;
-    //public GPTController portonControllerGPT;
+    public GPTController portonControllerGPT;
 
     public GameObject player;
     public GameObject enemy;
@@ -51,18 +46,6 @@ public class TraductionLogic : MonoBehaviour
     public GameObject teleportVFX;
 
     private Animator naeveAnimator;
-
-    // Tags del collider de cada gameobject de la escena
-    //private const string comicTag = "cómic";
-    //private const string umbrellaTag = "paraguas";
-    //private const string groundTag = "ground";
-    //private const string playerTag = "player";
-    //private const string troncoTag = "tronco";
-    //private const string mesaTag = "mesa";
-    //private const string sofaTag = "sofá";
-    //private const string velaTag = "vela";
-    //private const string sillaTag = "silla";
-    //private const string aliadoTag = "aliado";
 
     private string actionText;
     private string naeveText;
@@ -107,11 +90,6 @@ public class TraductionLogic : MonoBehaviour
     // Diccionario de string, correspondiente a la acción, y el método que la implementa
     private Dictionary<string, Action<GameObject>> actionObjectLogic = new();
 
-    //private void Awake()
-    //{
-    //    onClick = GameObject.FindObjectOfType<OnClick>();
-    //}
-
     private void Start()
     {
         InitializeActionObjectLogic();
@@ -143,6 +121,7 @@ public class TraductionLogic : MonoBehaviour
             if (hit.collider != null/* && hit.collider.CompareTag(tag)*/)
             {
                 string tag = hit.collider.tag;
+                Debug.Log("Collider detectado:" + hit.collider.tag);
                 buildInteractionMsg(hit); // Llamamos a un función auxiliar para generar el mensaje y enviárselo a GPT.
             }
             else // No ha detectado ningún collider, click en el escenario
@@ -171,53 +150,6 @@ public class TraductionLogic : MonoBehaviour
         }
     }
 
-    //private void InitializeGPTObjects()
-    //{
-    //    naeveController = /*new GameObject("NaeveController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
-    //    //errorController = /*new GameObject("ErrorController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
-    //    //resumenController = /*new GameObject("ResumenController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
-    //    //portonController = /*new GameObject("PortonController");*/ Instantiate(gptControllerPrefab, Vector3.zero, Quaternion.identity);
-
-    //    naeveControllerGPT = naeveController.AddComponent<GPTController>();
-    //    //errorControllerGPT = errorController.AddComponent<GPTController>();
-    //    //resumenControllerGPT = resumenController.AddComponent<GPTController>();
-    //    //portonControllerGPT = portonController.AddComponent<GPTController>();
-
-    //    InitializeGPTComponents(naeveControllerGPT);
-    //    //InitializeGPTComponents(errorControllerGPT);
-    //    //InitializeGPTComponents(resumenControllerGPT);
-    //    //InitializeGPTComponents(portonControllerGPT);
-    //}
-    //private void InitializeGPTComponents(GPTController gptController)
-    //{
-    //    // Buscar el objeto TMP_Text en la escena por su nombre
-    //    GameObject cosa = GameObject.Find("Naeve Chat");
-    //    if (cosa != null )
-    //    {
-    //        Debug.Log("encontrado objeto" + cosa);
-    //    }
-    //    else
-    //    {
-    //        Debug.Log("No encontrado Naeve Chat");
-    //    }
-    //    gptController.textito = GameObject.Find("Naeve Chat").GetComponent<TMP_Text>();
-
-    //    if (gptController.textito == null)
-    //    {
-    //        Debug.Log("No se ha encontrado textito");
-    //    }
-    //    else
-    //    {
-    //        Debug.Log(gptController.textito);
-    //    }
-
-    //    // Buscar el objeto RectTransform en la escena por su nombre
-    //    gptController.sent = GameObject.Find("Sent Message").GetComponent<RectTransform>();
-
-    //    // Buscar el objeto RectTransform en la escena por su nombre
-    //    gptController.received = GameObject.Find("Received Message").GetComponent<RectTransform>();
-    //}
-
     // Función para checkear si Naeve ha tocado ya el suelo y podemos quitar la animación de saltar
     private void CheckGroundedAfterJump()
     {
@@ -228,18 +160,9 @@ public class TraductionLogic : MonoBehaviour
         }
     }
 
-    //private void GenerateNaeveGPT() 
-    //{
-    //    // Obtenemos nuestro prompt inicial del promptManager
-    //    string prompt = promptManager.getNaevePrompt();
-    //    naeveControllerGPT.SetPrompt(prompt);
-    //    // Delegamos la inicialización en  GPT con el prompt inicial
-    //    //await SendAndHandleReply("");
-    //}
-
     private async void GenerateErrorGPT()
     {
-        string errorPrompt = promptManager.getErrorGPT();
+        string errorPrompt = promptManager.getErrorPrompt();
         errorControllerGPT.SetPrompt(errorPrompt);
         await SendAndHandleReplyError("");
     }
@@ -247,7 +170,7 @@ public class TraductionLogic : MonoBehaviour
     // Construye el prompt cuando aparece el hombre del sombrero
     private async void buildEnemyPrompt()
     {
-        string msg = "El enemigo (hombre del sombrero) ha aparecido en la escena y va hacia ti. Parece amenazador. Naeve tiene mucho miedo. Recuerda tus posibles acciones: Acción: {coger, mover, transformar, vibrar, desaparecer, menguar, crecer, explotar, atacar, esconderse, atraer, teletransportar, soltar, levitar, materializar, utilizar, saltar, hablar, esperar, caer, invisibilizar} y sólo puedes utilizar tus objetos en el inventario, que son: ";
+        string msg = promptManager.getEnemyPrompt();
 
         if (inventory.Count == 0)
         {
@@ -371,7 +294,7 @@ public class TraductionLogic : MonoBehaviour
         //GetErrorReply();
 
         // Parseamos el mensaje y obtenemos por un lado la acción y por el otro el texto en lenguaje natural
-        getAction(reply, out actionText, out naeveText);
+        GetAction(reply, out actionText, out naeveText);
 
         //if (firstMessage)
         //{
@@ -398,12 +321,6 @@ public class TraductionLogic : MonoBehaviour
         errorControllerGPT.AppendMessage(errorReply);
         errorControllerGPT.UpdateGPT();
         errorReply = "";
-    }
-
-    //Este método se llama desde GPTController cuando la respuesta está lista
-    public void SetReply(string response)
-    {
-        reply = response;
     }
 
     private void InitializeGameObjectDictionary()
@@ -585,11 +502,11 @@ public class TraductionLogic : MonoBehaviour
         speed = 15f;
         hidde = true;
 
-        if (IsGrounded()) 
+        if (IsGrounded())
         {
             MoveNaeve();
             MoveTowardsTarget(player);
-        }  
+        }
     }
 
     private void Atacar(GameObject obj)
@@ -714,46 +631,76 @@ public class TraductionLogic : MonoBehaviour
         return false;
     }
 
-    // Separamos el texto que es de acciones de Naeve y el hablado. Utilizo parámetros de salida para devolver ambos textos.
-    public void getAction(string message, out string actionText, out string naeveText)
+    public void GetAction(string message, out string actionText, out string naiveText)
     {
-        actionText = "";
-        naeveText = message;
+        Debug.Log(message);
+        // Inicialización de las variables de salida
+        actionText = string.Empty;
+        naiveText = string.Empty;
 
-        int indiceCorcheteApertura = -1;
-        int indiceCorcheteCierre = -1;
+        // Usar expresiones regulares para encontrar la acción y el parámetro si existe
+        var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
 
-        while (true)
+        if (!match.Success)
         {
-            indiceCorcheteApertura = naeveText.IndexOf('[', indiceCorcheteApertura + 1);
-            indiceCorcheteCierre = naeveText.IndexOf(']', indiceCorcheteCierre + 1);
-
-            if (indiceCorcheteApertura != -1 && indiceCorcheteCierre != -1 && indiceCorcheteCierre > indiceCorcheteApertura)
-            {
-                string textoEntreCorchetes = naeveText.Substring(indiceCorcheteApertura + 1, indiceCorcheteCierre - indiceCorcheteApertura - 1);
-                string textoAntesDeCorchetes = naeveText.Substring(0, indiceCorcheteApertura);
-                string textoDespuesDeCorchetes = naeveText.Substring(indiceCorcheteCierre + 1).Trim();
-
-                //Debug.Log("Texto entre corchetes: " + textoEntreCorchetes);
-                //Debug.Log("Texto antes de corchetes: " + textoAntesDeCorchetes);
-                //Debug.Log("Texto después de corchetes: " + textoDespuesDeCorchetes);
-
-                // CUIDADO POR SI ELIMINO ALGO QUE NO TOCA
-                naeveText = textoAntesDeCorchetes.TrimEnd(',', ' ') + textoDespuesDeCorchetes.TrimEnd(',', ' ');
-                actionText = actionText + "/" + textoEntreCorchetes;
-
-                indiceCorcheteApertura = -1;
-                indiceCorcheteCierre = -1;
-            }
-            else
-            {
-                break;
-            }
+            // Si no hay acción, todo el mensaje se considera texto en lenguaje natural
+            naiveText = message;
+            return;
         }
+
+        // Extraer el comando completo
+        actionText = match.Value;
+
+        // Remover el comando del mensaje original para obtener el texto en lenguaje natural
+        naiveText = Regex.Replace(message, Regex.Escape(match.Value), "").Trim();
+
+        // Asegurar que el texto en lenguaje natural no comience ni termine con espacios innecesarios
+        naiveText = naiveText.Trim();
 
         Debug.Log("Texto restante final: " + naeveText);
         Debug.Log("Acciones: " + actionText);
     }
+
+    // Separamos el texto que es de acciones de Naeve y el hablado. Utilizo parámetros de salida para devolver ambos textos.
+    //public void getAction(string message, out string actionText, out string naeveText)
+    //{
+    //    actionText = "";
+    //    naeveText = message;
+
+    //    int indiceCorcheteApertura = -1;
+    //    int indiceCorcheteCierre = -1;
+
+    //    while (true)
+    //    {
+    //        indiceCorcheteApertura = naeveText.IndexOf('[', indiceCorcheteApertura + 1);
+    //        indiceCorcheteCierre = naeveText.IndexOf(']', indiceCorcheteCierre + 1);
+
+    //        if (indiceCorcheteApertura != -1 && indiceCorcheteCierre != -1 && indiceCorcheteCierre > indiceCorcheteApertura)
+    //        {
+    //            string textoEntreCorchetes = naeveText.Substring(indiceCorcheteApertura + 1, indiceCorcheteCierre - indiceCorcheteApertura - 1);
+    //            string textoAntesDeCorchetes = naeveText.Substring(0, indiceCorcheteApertura);
+    //            string textoDespuesDeCorchetes = naeveText.Substring(indiceCorcheteCierre + 1).Trim();
+
+    //            //Debug.Log("Texto entre corchetes: " + textoEntreCorchetes);
+    //            //Debug.Log("Texto antes de corchetes: " + textoAntesDeCorchetes);
+    //            //Debug.Log("Texto después de corchetes: " + textoDespuesDeCorchetes);
+
+    //            // CUIDADO POR SI ELIMINO ALGO QUE NO TOCA
+    //            naeveText = textoAntesDeCorchetes.TrimEnd(',', ' ') + textoDespuesDeCorchetes.TrimEnd(',', ' ');
+    //            actionText = actionText + "/" + textoEntreCorchetes;
+
+    //            indiceCorcheteApertura = -1;
+    //            indiceCorcheteCierre = -1;
+    //        }
+    //        else
+    //        {
+    //            break;
+    //        }
+    //    }
+
+    //    Debug.Log("Texto restante final: " + naeveText);
+    //    Debug.Log("Acciones: " + actionText);
+    //}
 
     public void InterpretString(string inputString)
     {
@@ -787,7 +734,7 @@ public class TraductionLogic : MonoBehaviour
                 {
                     Debug.Log("Estamos dentro de la acción");
                     objectParsed = GetPrefabToSpawn(objeto);
-                    if (objectParsed != null) 
+                    if (objectParsed != null)
                     {
                         ExecuteActionObjectLogic(action, objectParsed);
                     }
@@ -880,6 +827,7 @@ public class TraductionLogic : MonoBehaviour
         }
     }
 
+    // Función para hacer aparecer el prefab indicado como string
     private GameObject GetPrefabToSpawn(string objeto)
     {
         // Me aseguro de que el formato del nombre es el correcto

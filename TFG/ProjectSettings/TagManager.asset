@@ -42,6 +42,7 @@ TagManager:
   - pozo
   - puerta
   - llave
+  - enemigo
   layers:
   - Default
   - TransparentFX
