@@ -1777,7 +1777,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &374816397
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3667,7 +3667,7 @@ GameObject:
   - component: {fileID: 815260789}
   m_Layer: 3
   m_Name: Suelo
-  m_TagString: ground
+  m_TagString: suelo
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9692,7 +9692,7 @@ GameObject:
   - component: {fileID: 2035986005}
   m_Layer: 0
   m_Name: escenario
-  m_TagString: Background
+  m_TagString: escenario
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -43,6 +43,8 @@ TagManager:
   - puerta
   - llave
   - enemigo
+  - escenario
+  - suelo
   layers:
   - Default
   - TransparentFX

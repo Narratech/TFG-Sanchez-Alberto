@@ -55,6 +55,8 @@ public class TraductionLogic : MonoBehaviour
 
     private string reply = "";
     private string errorReply = "";
+    private string correction = "";
+    private bool errorTrigger = false;
 
     private Vector2 target;
     private float posX, posY;
@@ -318,6 +320,8 @@ public class TraductionLogic : MonoBehaviour
         {
             await Task.Delay(10);
         }
+        // Guardamos la posible corrección por si es necesario enviarla
+        correction = errorReply;
         errorControllerGPT.AppendMessage(errorReply);
         errorControllerGPT.UpdateGPT();
         errorReply = "";
@@ -592,6 +596,14 @@ public class TraductionLogic : MonoBehaviour
             obj.SetActive(false);
             //Destroy(obj);
             Debug.Log("Añadido: " + inventory[inventory.Count - 1] + " al inventario.");
+            
+            // Enviamos a GPT la información con el inventario actualizado.
+            string msg = obj.tag + " añadido al inventario. Objetos en el inventario: ";
+            foreach (string item in inventory)
+            {
+                msg += item;
+            }
+            buildOtherMsg(msg);
         }
         else
         {
@@ -767,7 +779,8 @@ public class TraductionLogic : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogError("Formato de posición no válido.");
+                    errorTrigger = true;
+                    Debug.LogWarning("Formato de posición no válido.");
                 }
             }
             else if (parts.Length == 4 && subParts.Length == 1) // Formato: /accion/objeto/objeto
@@ -799,12 +812,14 @@ public class TraductionLogic : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogError("Formato de posición no válido.");
+                    errorTrigger = true;
+                    Debug.LogWarning("Formato de posición no válido.");
                 }
             }
             else
             {
-                Debug.LogError("Formato no reconocido.");
+                errorTrigger = true;
+                Debug.LogWarning("Formato no reconocido.");
             }
         }
         else if (parts.Length == 2)
@@ -823,7 +838,20 @@ public class TraductionLogic : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Formato no válido.");
+            errorTrigger = true;
+            Debug.LogWarning("Formato no válido.");
+        }
+
+        // Si se ha detectado un error, volvemos a llamar a la función con el comando corregido por el GPT corrector.
+        if (errorTrigger)
+        {
+            Debug.Log("Corrección: " + correction);
+            errorTrigger = false;
+            // Solo hago la llamada con el input corregido si no son idénticos, de esta forma evito entrar en bucle si la correción también es errónea
+            if (inputString != correction)
+            {
+                InterpretString(correction);
+            }
         }
     }
 

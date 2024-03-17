@@ -46,7 +46,7 @@ namespace OpenAI
             string allPrompts = "";
             for (int i = 2; i < messages.Count; i++)
             {
-                string part = "Mensaje " + i + ": " + messages[i].Content;
+                string part = "Mensaje " + i + ": " + messages[i].Content + "\n";
                 allPrompts += part;
             }
             return allPrompts;
@@ -67,11 +67,13 @@ namespace OpenAI
         {
 
             //Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
-            //for (int i = 0; i < messages.Count; i++)
-            //{
-            //    Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
-            //}
-
+            if (this.name != "Error GPT")
+            {
+                for (int i = 0; i < messages.Count; i++)
+                {
+                    Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
+                }
+            }
         }
 
         // Obtiene la respuesta ya parseada, que corresponde con las acciones a realizar
