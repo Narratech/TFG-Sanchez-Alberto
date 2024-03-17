@@ -25,6 +25,7 @@ public class TraductionLogic : MonoBehaviour
     private LogicController logicController = new LogicController();
     private PromptManager promptManager = new PromptManager();
     private OnClick onClick = new();
+    private Utilizador utilizarController = new Utilizador();
 
     public GPTController naeveControllerGPT;
     public GPTController errorControllerGPT;
@@ -79,6 +80,8 @@ public class TraductionLogic : MonoBehaviour
     private float jumpForce = 700f;
     private bool isJumping = false;
     private const float interactionRange = 12f; // Rango de interacción con los objetos
+
+    private bool paraguasActivated = false;
 
     // Abecedario del lenguaje formal, dividido en acciones, objetos y entidades
     private string[] actions = { "coger", "mover", "transformar", "vibrar", "desaparecer", "menguar", "crecer", "explotar", "atacar", "esconderse", "atraer", "teletransportar", "soltar", "levitar", "materializar", "utilizar", "saltar", "hablar", "esperar", "caer", "invisibilizar" };
@@ -152,6 +155,16 @@ public class TraductionLogic : MonoBehaviour
         }
     }
 
+    public void ActivateParaguas()
+    {
+        paraguasActivated = true;
+    }
+
+    public void DeactivateParaguas()
+    {
+        paraguasActivated = false;
+    }
+
     // Función para checkear si Naeve ha tocado ya el suelo y podemos quitar la animación de saltar
     private void CheckGroundedAfterJump()
     {
@@ -192,7 +205,7 @@ public class TraductionLogic : MonoBehaviour
     // Creamos el mensaje cuando hace click el jugador, y la corutina para enviarlo a GPT
     private async void buildInteractionMsg(RaycastHit2D hit)
     {
-        string sendMsg = "El jugador ha hecho click en " + hit.collider.gameObject.name + ", en la posición: " + hit.point;
+        string sendMsg = "El jugador ha hecho click en " + hit.collider.gameObject.name + ", en la posición: " + hit.point + " .Utiliza el paraguas!";
         Debug.Log(hit.point);
         await SendAndHandleReply(sendMsg);
     }
@@ -336,7 +349,7 @@ public class TraductionLogic : MonoBehaviour
         objectDictionary.Add("mesa", mesa);
         objectDictionary.Add("vela", vela);
         objectDictionary.Add("silla", silla);
-        objectDictionary.Add("Naeve", player);
+        objectDictionary.Add("naeve", player);
         objectDictionary.Add("enemigo", enemy);
     }
 
@@ -434,7 +447,7 @@ public class TraductionLogic : MonoBehaviour
     // Métodos con lógica para acciones específicas que aceptan un GameObject como argumento
     private void Utilizar(GameObject obj)
     {
-        throw new NotImplementedException();
+        utilizarController.Utilizar(obj);
     }
 
     private void Materializar(GameObject obj)
@@ -668,6 +681,7 @@ public class TraductionLogic : MonoBehaviour
 
         // Asegurar que el texto en lenguaje natural no comience ni termine con espacios innecesarios
         naiveText = naiveText.Trim();
+        actionText = actionText.Trim();
 
         Debug.Log("Texto restante final: " + naeveText);
         Debug.Log("Acciones: " + actionText);

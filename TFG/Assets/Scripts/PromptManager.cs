@@ -21,7 +21,7 @@ public class PromptManager
 
     private string scene2 = "Escena actual: «Bosque oscuro. Hay una tormenta que está amainando. Apareces en la posición (11.21,0). Hay un cofre en la posición (0.63,0). Hay un portón en la posición (45,0). Si la posición del objeto no está dada, significa que lo tienes en el inventario a tu disposición.»\r\n";
 
-    private string inventario = "Objeto añadido al inventario";
+    //private string inventario = "Objeto añadido al inventario";
 
     public string getNaevePrompt() 
     { 

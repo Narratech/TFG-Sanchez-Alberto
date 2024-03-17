@@ -34,14 +34,7 @@ public abstract class SceneScript : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Entrada en el acceso de dartosa");
-                    // Cargar el JSON de todos los prompts de la escena anterior desde el archivo y deserializar
-                    //string jsonData = File.ReadAllText(Application.persistentDataPath + "/gptPrompts.json");
-                    //string gptPrompts = JsonUtility.FromJson<string>(jsonData);
-                    //Debug.Log("Json data obtenido: " + jsonData);
-                    //Debug.Log("Promps obtenidos: " + gptPrompts);
                     string gptPrompts = PlayerPrefs.GetString("GptPromptsData");
-                    Debug.Log("Promps obtenidos: " + gptPrompts);
                     // Incorpora el prompt específico del resto de escenas al prompt general
                     string prompt = await GetScenePrompt(gptPrompts);
                     gptController.SetPrompt(prompt);

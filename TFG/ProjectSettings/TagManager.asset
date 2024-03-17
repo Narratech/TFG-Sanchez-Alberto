@@ -45,6 +45,7 @@ TagManager:
   - enemigo
   - escenario
   - suelo
+  - Naeve
   layers:
   - Default
   - TransparentFX

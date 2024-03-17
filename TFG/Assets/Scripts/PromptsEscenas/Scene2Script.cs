@@ -13,6 +13,7 @@ public class Scene2Script : SceneScript
         string resumenPrompt = await promptManager.getResumenPrompt(allPrompts);
 
         string prompt = promptManager.getNaevePrompt() + "Resumen de la escena anterior: " + resumenPrompt + "\n" + promptManager.getScene2Prompt();
+        Debug.Log("Resumen" + resumenPrompt);
         // Devuelve el prompt específico de la escena 2
         return prompt;
     }
