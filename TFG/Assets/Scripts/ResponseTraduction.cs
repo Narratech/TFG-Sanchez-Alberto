@@ -28,6 +28,7 @@ public class TraductionLogic : MonoBehaviour
     private Utilizador utilizarController = new Utilizador();
 
     public GPTController naeveControllerGPT;
+    public GPTController actionControllerGPT;
     public GPTController errorControllerGPT;
     //public GPTController resumenControllerGPT;
     public GPTController portonControllerGPT;
@@ -205,7 +206,7 @@ public class TraductionLogic : MonoBehaviour
     // Creamos el mensaje cuando hace click el jugador, y la corutina para enviarlo a GPT
     private async void buildInteractionMsg(RaycastHit2D hit)
     {
-        string sendMsg = "El jugador ha hecho click en " + hit.collider.gameObject.name + ", en la posición: " + hit.point + " .Utiliza el paraguas!";
+        string sendMsg = "El jugador ha hecho click en " + hit.collider.gameObject.name + ", en la posición: " + hit.point;
         Debug.Log(hit.point);
         await SendAndHandleReply(sendMsg);
     }
@@ -308,8 +309,13 @@ public class TraductionLogic : MonoBehaviour
         await SendAndHandleReplyError(reply);
         //GetErrorReply();
 
+        naeveText = reply;
+
+        string actionReply = await actionControllerGPT.SendReply(msgSend + "\n" + reply);
+        Debug.Log("ACCION: " + actionReply);
+
         // Parseamos el mensaje y obtenemos por un lado la acción y por el otro el texto en lenguaje natural
-        GetAction(reply, out actionText, out naeveText);
+        GetAction(actionReply);
 
         //if (firstMessage)
         //{
@@ -318,6 +324,7 @@ public class TraductionLogic : MonoBehaviour
         //}
 
         naeveControllerGPT.AppendMessage(naeveText);
+        actionControllerGPT.AppendMessage(actionText);
 
         // Llama a traduce para traducir el mensaje a una acción.
         InterpretString(actionText);
@@ -406,10 +413,15 @@ public class TraductionLogic : MonoBehaviour
     // Si el objeto tiene rigidbody que está desactivado, lo activa. De esta forma el objeto caerá
     private void Caer(GameObject obj)
     {
-        if (obj.GetComponent<Rigidbody2D>().IsSleeping())
+        Rigidbody2D body = obj.GetComponent<Rigidbody2D>();
+        if (body != null)
         {
-            obj.GetComponent<Rigidbody2D>().WakeUp();
+            if (obj.GetComponent<Rigidbody2D>().IsSleeping())
+            {
+                obj.GetComponent<Rigidbody2D>().WakeUp();
+            }
         }
+        
 
         //Collider collider = obj.GetComponent<Collider>();
         //if (collider != null)
@@ -656,36 +668,53 @@ public class TraductionLogic : MonoBehaviour
         return false;
     }
 
-    public void GetAction(string message, out string actionText, out string naiveText)
+    public void GetAction(string message)
     {
         Debug.Log(message);
         // Inicialización de las variables de salida
         actionText = string.Empty;
-        naiveText = string.Empty;
 
         // Usar expresiones regulares para encontrar la acción y el parámetro si existe
         var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
 
-        if (!match.Success)
-        {
-            // Si no hay acción, todo el mensaje se considera texto en lenguaje natural
-            naiveText = message;
-            return;
-        }
-
         // Extraer el comando completo
         actionText = match.Value;
 
-        // Remover el comando del mensaje original para obtener el texto en lenguaje natural
-        naiveText = Regex.Replace(message, Regex.Escape(match.Value), "").Trim();
+        actionText = actionText.TrimEnd(',', ' ', '.');
 
-        // Asegurar que el texto en lenguaje natural no comience ni termine con espacios innecesarios
-        naiveText = naiveText.Trim();
-        actionText = actionText.Trim();
-
-        Debug.Log("Texto restante final: " + naeveText);
         Debug.Log("Acciones: " + actionText);
     }
+
+    //public void GetAction(string message, out string actionText, out string naiveText)
+    //{
+    //    Debug.Log(message);
+    //    // Inicialización de las variables de salida
+    //    actionText = string.Empty;
+    //    naiveText = string.Empty;
+
+    //    // Usar expresiones regulares para encontrar la acción y el parámetro si existe
+    //    var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
+
+    //    if (!match.Success)
+    //    {
+    //        // Si no hay acción, todo el mensaje se considera texto en lenguaje natural
+    //        naiveText = message;
+    //        return;
+    //    }
+
+    //    // Extraer el comando completo
+    //    actionText = match.Value;
+
+    //    // Remover el comando del mensaje original para obtener el texto en lenguaje natural
+    //    naiveText = Regex.Replace(message, Regex.Escape(match.Value), "").Trim();
+
+    //    // Asegurar que el texto en lenguaje natural no comience ni termine con espacios innecesarios
+    //    naiveText = naiveText.TrimEnd(',', ' ', '.');
+    //    actionText = actionText.TrimEnd(',', ' ', '.');
+
+    //    Debug.Log("Texto restante final: " + naeveText);
+    //    Debug.Log("Acciones: " + actionText);
+    //}
 
     // Separamos el texto que es de acciones de Naeve y el hablado. Utilizo parámetros de salida para devolver ambos textos.
     //public void getAction(string message, out string actionText, out string naeveText)
@@ -876,10 +905,10 @@ public class TraductionLogic : MonoBehaviour
         string prefabName = char.ToUpper(objeto[0]) + objeto.Substring(1).ToLower();
         // Intento cargar el prefab desde la carpeta
         Debug.Log("El nombre del prefab a buscar será: " + prefabName);
-        GameObject prefab = Resources.Load<GameObject>("Prefabs/" + prefabName);
-        Debug.Log("El prefab encontrado es:" + prefab.name);
+        GameObject prefab = Resources.Load<GameObject>("Prefabs/" + prefabName);   
         if (prefab != null)
         {
+            Debug.Log("El prefab encontrado es:" + prefab.name);
             // Si se encontró el prefab, lo devuelve
             return prefab;
         }

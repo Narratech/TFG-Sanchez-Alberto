@@ -13,7 +13,7 @@ public class CambioEscena : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Verifica si el personaje ha cruzado el límite (extremo derecho de la pantalla)
-        if (other.CompareTag("player"))
+        if (other.CompareTag("Naeve"))
         {
             // Buscamos el GPT de Naeve
             GameObject gptNaeveObject = GameObject.Find("Naeve GPT");

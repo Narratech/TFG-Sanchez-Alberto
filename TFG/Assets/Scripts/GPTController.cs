@@ -67,7 +67,7 @@ namespace OpenAI
         {
 
             //Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
-            if (this.name == "Naeve GPT")
+            if (this.name == "Naeve GPT" || this.name ==  "Action GPT")
             {
                 for (int i = 0; i < messages.Count; i++)
                 {

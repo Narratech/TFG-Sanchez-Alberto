@@ -10,7 +10,8 @@ public class Scene1Script : SceneScript
 
     protected override string GetScenePrompt()
     {
-        string prompt = promptManager.getNaevePrompt() + promptManager.getScene1Prompt();
+        //string prompt = promptManager.getNaevePrompt() + promptManager.getScene1Prompt();
+        string prompt = promptManager.getNarraevePrompt() + promptManager.getScene1Prompt();
         // Devuelve el prompt específico de la escena 1
         return prompt;
     }
