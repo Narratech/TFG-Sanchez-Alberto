@@ -114,6 +114,12 @@ public class TraductionLogic : MonoBehaviour
 
     private void Update()
     {
+        if (PauseMenu.gameIsPaused) // Asumiendo que isGamePaused es una variable estática o accesible globalmente
+        {
+            Debug.Log("JUEGO PAUSADO");
+            return; // Ignora el resto del código en Update si el juego está pausado
+        }
+
         if (enemy.activeSelf && !enemyAwake) // Comprueba si el enemigo ha aparecido ya para generar el prompt correspondiente.
         {
             enemyAwake = true;
@@ -680,7 +686,14 @@ public class TraductionLogic : MonoBehaviour
         // Extraer el comando completo
         actionText = match.Value;
 
-        actionText = actionText.TrimEnd(',', ' ', '.');
+        int spaceIndex = actionText.IndexOf(' ');
+        if (spaceIndex != -1)
+        {
+            // Si hay un espacio, cortar la cadena hasta ese punto
+            actionText = actionText.Substring(0, spaceIndex);
+        }
+
+        actionText = actionText.TrimEnd(',', ' ', '.', '"');
 
         Debug.Log("Acciones: " + actionText);
     }
