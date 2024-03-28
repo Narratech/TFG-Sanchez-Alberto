@@ -10,9 +10,18 @@ public class Scene2Script : SceneScript
     protected override async Task<string> GetScenePrompt(string allPrompts)
     {
         // Llama a la función y espera a que se complete
-        string resumenPrompt = await promptManager.getResumenPrompt(allPrompts);
+        string resumenPrompt = "";
+        string prompt = "";
+        if (!string.IsNullOrEmpty(allPrompts))
+        {
+            resumenPrompt = await promptManager.getResumenPrompt(allPrompts);
+            prompt = promptManager.getNarraevePrompt() + "Resumen de la escena anterior: " + resumenPrompt + "\n" + promptManager.getScene2Prompt();
 
-        string prompt = promptManager.getNaevePrompt() + "Resumen de la escena anterior: " + resumenPrompt + "\n" + promptManager.getScene2Prompt();
+        }
+        else
+        {
+            prompt = promptManager.getNarraevePrompt() + "\n" + promptManager.getScene2Prompt();
+        }
         Debug.Log("Resumen" + resumenPrompt);
         // Devuelve el prompt específico de la escena 2
         return prompt;

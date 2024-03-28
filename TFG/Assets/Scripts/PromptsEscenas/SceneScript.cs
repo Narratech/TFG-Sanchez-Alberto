@@ -42,7 +42,7 @@ public abstract class SceneScript : MonoBehaviour
                 }
                 else
                 {
-                    string gptPrompts = PlayerPrefs.GetString("GptPromptsData");
+                    string gptPrompts = PlayerPrefs.HasKey("GptPromptsData") ? PlayerPrefs.GetString("GptPromptsData") : "";
                     // Incorpora el prompt específico del resto de escenas al prompt general
                     string prompt = await GetScenePrompt(gptPrompts);
                     gptNaeveController.SetPrompt(prompt);

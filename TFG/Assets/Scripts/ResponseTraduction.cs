@@ -33,6 +33,8 @@ public class TraductionLogic : MonoBehaviour
     //public GPTController resumenControllerGPT;
     public GPTController portonControllerGPT;
 
+    public GameObject canvasObj;
+
     public GameObject player;
     public GameObject enemy;
     public GameObject porton;
@@ -46,6 +48,7 @@ public class TraductionLogic : MonoBehaviour
     public GameObject vela;
 
     public GameObject teleportVFX;
+    public GameObject explosionVFX;
 
     private Animator naeveAnimator;
 
@@ -72,6 +75,9 @@ public class TraductionLogic : MonoBehaviour
     private float fadeSpeed = 1.0f;
     private float invisibleValue = 0.021f;
 
+    private bool attacking = false;
+    private GameObject objAttacked = null;
+
     private GameObject objectMoving = null;
     private GameObject objectInvisible = null;
 
@@ -80,7 +86,7 @@ public class TraductionLogic : MonoBehaviour
     private float speed = 10f;
     private float jumpForce = 700f;
     private bool isJumping = false;
-    private const float interactionRange = 12f; // Rango de interacción con los objetos
+    private const float interactionRange = 13f; // Rango de interacción con los objetos
 
     private bool paraguasActivated = false;
 
@@ -110,6 +116,47 @@ public class TraductionLogic : MonoBehaviour
         //InitializeGPTObjects();
         //GenerateNaeveGPT();
         GenerateErrorGPT();
+        // Añado esto porque he tenido problemas para que la partida no esté pausada al resetearse
+        PauseMenu.gameIsPaused = false;
+
+        //string message = "Lenguaje formal: /Mover/59.58,4.69\r\nLenguaje formal: /Empujar/portón";
+        //cosa(message);
+        //ProcesarComandos(message);
+    }
+
+    private void ProcesarComandos(string message)
+    {
+        // Ajuste en la expresión regular para capturar adecuadamente el patrón deseado.
+        // Esta expresión captura '/Comando/parametros' seguido opcionalmente por otros caracteres,
+        // pero solo nos interesan los grupos capturados antes del espacio o fin de la cadena.
+        var match = Regex.Match(message, @"(\/\w+\/[^ \r\n]*)");
+
+        // Ahora 'actionText' contendrá solo el texto que coincide con el patrón deseado.
+        string actionText = match.Success ? match.Groups[1].Value : "";
+
+        // Limpieza final para eliminar caracteres no deseados, si es necesario.
+        // Esta línea puede ser opcional dependiendo de si tu expresión regular ya asegura el formato deseado.
+        actionText = Regex.Replace(actionText, @"[^\w\/,.]", "");
+
+        Debug.Log("TEXTO NUEVO: " + actionText);
+    }
+
+
+    private void cosa(string message)
+    {
+        var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
+        actionText = match.Value;
+
+        int spaceIndex = actionText.IndexOf(' ');
+        if (spaceIndex != -1)
+        {
+            // Si hay un espacio, cortar la cadena hasta ese punto
+            actionText = actionText.Substring(0, spaceIndex);
+        }
+
+        actionText = Regex.Replace(actionText, @"[^\w\d/,.]", "");
+
+        Debug.Log("TEXTO: " + actionText);
     }
 
     private void Update()
@@ -160,6 +207,26 @@ public class TraductionLogic : MonoBehaviour
             // Introduzco un pequeño retraso para que le de tiempo a comenzar a saltar antes de comprobar si Naeve no está en el suelo. Ya que, de otro modo, se desactiva inmediatamente la animación
             Invoke("CheckGroundedAfterJump", 0.1f);
         }
+
+        if (attacking)
+        {
+            if (isOnRange(enemy) && enemy.activeSelf)
+            {
+                moving = false;
+                objectMoving = null;
+                naeveAnimator.SetTrigger("attack");
+                attacking = false;
+                Debug.Log("No me puedes hacer daño");
+            }
+        }
+        else
+        {
+            if (isOnRange(enemy) && enemy.activeSelf)
+            {
+                NaeveDeath();
+            }
+        }
+
     }
 
     public void ActivateParaguas()
@@ -251,7 +318,7 @@ public class TraductionLogic : MonoBehaviour
             {
                 // Cambiamos la capa de Naeve para esconderla tras los objetos
                 logicController.ChangeLayer(player.transform, 8, "hidden");
-                speed = 10f;
+                SetSpeed(10f);
                 // Naeve ya está escondida
                 hidde = false;
                 hidden = true;
@@ -377,19 +444,19 @@ public class TraductionLogic : MonoBehaviour
         actionObjectLogic.Add("desaparecer", Desaparecer); // HECHO
         actionObjectLogic.Add("menguar", Menguar); // HECHO
         actionObjectLogic.Add("crecer", Crecer); // HECHO
-        actionObjectLogic.Add("explotar", Explotar);
-        actionObjectLogic.Add("atacar", Atacar);
+        actionObjectLogic.Add("explotar", Explotar); // HECHO
+        actionObjectLogic.Add("atacar", Atacar); // HECHO
         actionObjectLogic.Add("esconderse", Esconderse); // HECHO
         actionObjectLogic.Add("atraer", Atraer); // HECHO
         actionObjectLogic.Add("teletransportar", Teletransportar); // HECHO
-        actionObjectLogic.Add("soltar", Soltar);
+        actionObjectLogic.Add("soltar", Soltar); // HECHO
         actionObjectLogic.Add("levitar", Levitar); // HECHO
         actionObjectLogic.Add("materializar", Materializar); // HECHO
         actionObjectLogic.Add("utilizar", Utilizar);
         actionObjectLogic.Add("saltar", Saltar); // HECHO
         actionObjectLogic.Add("hablar", Hablar);
         actionObjectLogic.Add("esperar", Esperar); // HECHO
-        actionObjectLogic.Add("caer", Caer);
+        actionObjectLogic.Add("caer", Caer); // HECHO
         actionObjectLogic.Add("invisibilizar", Invisibilizar); // HECHO
     }
 
@@ -534,7 +601,7 @@ public class TraductionLogic : MonoBehaviour
         target = (Vector2)obj.transform.position;
         moving = true;
         objectMoving = player;
-        speed = 15f;
+        SetSpeed(15f);
         hidde = true;
 
         if (IsGrounded())
@@ -546,12 +613,66 @@ public class TraductionLogic : MonoBehaviour
 
     private void Atacar(GameObject obj)
     {
-        throw new NotImplementedException();
+        if (inventory.Contains("cuchillo"))
+        {
+            GameObject naeve = GameObject.Find("Naeve");
+
+            if (naeve != null)
+            {
+                // Si se encuentra "Naeve", buscar dentro de él el objeto "Skeletal"
+                UnityEngine.Transform skeletalTransform = naeve.transform.Find("Skeletal");
+
+                if (skeletalTransform != null)
+                {
+                    // Si se encuentra "Skeletal", buscar dentro de él el objeto "Cuchillo"
+                    GameObject cuchillo = skeletalTransform.Find("Cuchillo").gameObject;
+
+                    if (cuchillo != null)
+                    {
+                        // Si se encuentra "Cuchillo", activarlo
+                        cuchillo.SetActive(true);
+                    }
+                    else
+                    {
+                        Debug.LogError("El objeto 'Cuchillo' no se ha encontrado dentro de 'Skeletal'.");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("El objeto 'Skeletal' no se ha encontrado dentro de 'Naeve'.");
+                }
+            }
+            else
+            {
+                Debug.LogError("El objeto 'Naeve' no se ha encontrado en la escena.");
+            }
+
+            target = (Vector2)obj.transform.position;
+            moving = true;
+            objectMoving = player;
+
+            if (IsGrounded())
+            {
+                attacking = true;
+                objAttacked = obj;
+                MoveNaeve();
+                MoveTowardsTarget(player);
+            }
+        }
+        else
+        {
+            Debug.Log("No tienes ningún objeto para atacar");
+        }
     }
 
     private void Explotar(GameObject obj)
     {
-        throw new NotImplementedException();
+        Debug.Log("Explotando...");
+        // Instanciamos el efecto de la explosión y aumentamos su tamaño
+        GameObject explosionInstance = Instantiate(explosionVFX, obj.transform.position, Quaternion.identity);
+        Vector3 nuevaEscala = new Vector3(10f, 10f, 10f); 
+        explosionInstance.transform.localScale = nuevaEscala;
+        Desaparecer(obj);
     }
 
     // Quizá en la función crecer, pedir a chat gpt cuanto tiene que crecer.
@@ -584,7 +705,7 @@ public class TraductionLogic : MonoBehaviour
         throw new NotImplementedException();
     }
 
-    void MoveNaeve()
+    private void MoveNaeve()
     {
         target.y = player.transform.position.y;
         // Si el target está a la izquierda, Naeve correría hacia la izquierda. Si no, hacia la derecha. Utilizo la posición x del vector en negativo o positivo para hacer esto
@@ -680,20 +801,44 @@ public class TraductionLogic : MonoBehaviour
         // Inicialización de las variables de salida
         actionText = string.Empty;
 
+        // Ajuste en la expresión regular para capturar adecuadamente el patrón deseado.
+        // Esta expresión captura '/Comando/parametros' seguido opcionalmente por otros caracteres,
+        // pero solo nos interesan los grupos capturados antes del espacio o fin de la cadena.
+        var match = Regex.Match(message, @"(\/\w+\/[^ \r\n]*)");
+
+        // Ahora 'actionText' contendrá solo el texto que coincide con el patrón deseado.
+        actionText = match.Success ? match.Groups[1].Value : "";
+
+        // Limpieza final para eliminar caracteres no deseados, si es necesario.
+        // Esta línea puede ser opcional dependiendo de si tu expresión regular ya asegura el formato deseado.
+        actionText = Regex.Replace(actionText, @"[^\w\/,.]", "");
+
         // Usar expresiones regulares para encontrar la acción y el parámetro si existe
-        var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
+        //var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
+
+        //var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
+
+        //var pattern = @"\/\w+(\/\w+)?(\/\d+,\d+)?";
+        //var matches = Regex.Matches(message, pattern);
+
+        //foreach (Match match in matches)
+        //{
+        //    Debug.Log("Comando encontrado: " + match.Value);
+        //}
 
         // Extraer el comando completo
-        actionText = match.Value;
+        //actionText = match.Value;
 
-        int spaceIndex = actionText.IndexOf(' ');
-        if (spaceIndex != -1)
-        {
-            // Si hay un espacio, cortar la cadena hasta ese punto
-            actionText = actionText.Substring(0, spaceIndex);
-        }
+        //int spaceIndex = actionText.IndexOf(' ');
+        //if (spaceIndex != -1)
+        //{
+        //    // Si hay un espacio, cortar la cadena hasta ese punto
+        //    actionText = actionText.Substring(0, spaceIndex);
+        //}
+        //// Eliminamos cualquier símbolo residual producto de la alucinación
+        //actionText = Regex.Replace(actionText, @"[^\w\d/,.]", "");
 
-        actionText = actionText.TrimEnd(',', ' ', '.', '"');
+        //actionText = actionText.TrimEnd(',', ' ', '.', '"', '-', '_', '*');
 
         Debug.Log("Acciones: " + actionText);
     }
@@ -835,7 +980,7 @@ public class TraductionLogic : MonoBehaviour
                 }
                 else
                 {
-                    errorTrigger = true;
+                    //errorTrigger = true;
                     Debug.LogWarning("Formato de posición no válido.");
                 }
             }
@@ -868,13 +1013,13 @@ public class TraductionLogic : MonoBehaviour
                 }
                 else
                 {
-                    errorTrigger = true;
+                    //errorTrigger = true;
                     Debug.LogWarning("Formato de posición no válido.");
                 }
             }
             else
             {
-                errorTrigger = true;
+                //errorTrigger = true;
                 Debug.LogWarning("Formato no reconocido.");
             }
         }
@@ -894,7 +1039,7 @@ public class TraductionLogic : MonoBehaviour
         }
         else
         {
-            errorTrigger = true;
+            //errorTrigger = true;
             Debug.LogWarning("Formato no válido.");
         }
 
@@ -933,4 +1078,33 @@ public class TraductionLogic : MonoBehaviour
         }
 
     }
+
+    private void SetSpeed(float speed)
+    {
+        this.speed = speed;
+    }
+
+    private void NaeveDeath()
+    {
+        Debug.Log("Naeve ha muerto");
+        naeveAnimator.SetTrigger("die");
+        // Ponemos el juego a pausado para no seguir actualizandolo
+
+        PauseMenu.gameIsPaused = true;
+        Invoke("ActivatePause", 1.2f);
+        // Abrimos el menú de muerte, desde el que se puede voler a empezar o salir con un poco de delay para poder ver la animación de muerte.
+    }
+
+    private void ActivatePause()
+    {
+        if (canvasObj != null)
+        {
+            PauseMenu pauseMenu = canvasObj.GetComponent<PauseMenu>();
+            if (pauseMenu != null)
+            {
+                pauseMenu.DeathPause();
+            }
+        }
+    }
+
 }
