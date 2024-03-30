@@ -26,6 +26,8 @@ namespace OpenAI
             button.onClick.AddListener(SendReply);
         }
 
+
+
         private void AppendMessage(ChatMessage message)
         {
             scroll.content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0);

@@ -16,6 +16,8 @@ namespace OpenAI
         [SerializeField] public TMP_Text textito;
         [SerializeField] public RectTransform sent;
         [SerializeField] public RectTransform received;
+        [SerializeField] public TMP_InputField inputField;
+        [SerializeField] public Button button;
 
         //private static GPTController _instance;
 
@@ -28,6 +30,18 @@ namespace OpenAI
         private string naeveText;
 
         private string prompt = "";
+
+        //private void Start()
+        //{
+        //    // Utilizo un función anónima para pasar el argumento al momento de añadir al listener
+        //    button.onClick.AddListener(async () => await SendReply(reply));
+        //}
+
+        public async void ButtonPulsedAsync()
+        {
+            string answer = inputField.text;
+            await SendReply(answer);
+        }
 
         // Añade el prompt específico de cada escena al prompt general. 
         public void SetPrompt(string newPrompt)
@@ -67,13 +81,13 @@ namespace OpenAI
         {
 
             //Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
-            if (this.name == "Naeve GPT" || this.name ==  "Action GPT")
+            //if (this.name == "Naeve GPT" || this.name ==  "Action GPT")
+            //{
+            for (int i = 0; i < messages.Count; i++)
             {
-                for (int i = 0; i < messages.Count; i++)
-                {
-                    Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
-                }
+                Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
             }
+            //}
         }
 
         // Obtiene la respuesta ya parseada, que corresponde con las acciones a realizar
@@ -94,6 +108,14 @@ namespace OpenAI
 
             messages.Add(newMessage);
 
+            // Si tenemos inputField y botón en este GPT, los desactivamos y reseteamos el texto para que no se puedan utilizar durante la comunicación
+            if (inputField != null && button != null) 
+            {
+                button.enabled = false;
+                inputField.text = "";
+                inputField.enabled = false;
+            }
+
             var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest()
             {
                 Model = "gpt-3.5-turbo-0125",
@@ -107,6 +129,13 @@ namespace OpenAI
                 message.Content = message.Content.Trim();
 
                 messages.Add(message);
+
+                // Volvemos a poner disponibles el input field y el botón
+                if (inputField != null && button != null)
+                {
+                    button.enabled = true;
+                    inputField.enabled = true;
+                }
 
                 return message.Content;
             }

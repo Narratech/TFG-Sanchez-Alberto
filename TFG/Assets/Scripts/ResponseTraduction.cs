@@ -46,6 +46,7 @@ public class TraductionLogic : MonoBehaviour
     public GameObject sofa;
     public GameObject silla;
     public GameObject vela;
+    public GameObject cofre;
 
     public GameObject teleportVFX;
     public GameObject explosionVFX;
@@ -60,6 +61,7 @@ public class TraductionLogic : MonoBehaviour
 
     private string reply = "";
     private string errorReply = "";
+    private string portonReply = "";
     private string correction = "";
     private bool errorTrigger = false;
 
@@ -93,7 +95,7 @@ public class TraductionLogic : MonoBehaviour
     // Abecedario del lenguaje formal, dividido en acciones, objetos y entidades
     private string[] actions = { "coger", "mover", "transformar", "vibrar", "desaparecer", "menguar", "crecer", "explotar", "atacar", "esconderse", "atraer", "teletransportar", "soltar", "levitar", "materializar", "utilizar", "saltar", "hablar", "esperar", "caer", "invisibilizar" };
     private string[] objects = { "paraguas", "cómic", "tronco", "sofá", "mesa", "vela", "silla" };
-    private string[] entities = { "Naeve", "enemigo", "aliado" };
+    private string[] entities = { "Naeve", "enemigo", "portón" };
     private string[] objectsNoScene = { "llave", "puerta", "linterna" };
     //private GameObject[] gameObjectList = { player, comic, paraguas };
     private List<string> inventory = new();
@@ -111,17 +113,17 @@ public class TraductionLogic : MonoBehaviour
         // Obtenemos la capa del suelo para poder saber cuando está encima Naeve y cuando no
         groundLayerMask = LayerMask.GetMask("suelo");
         logicController.SetBodyParts(player.transform);
-        // Obtenermos las capas por defecto de Naeve
-        // Creamos los objetos que serán
-        //InitializeGPTObjects();
-        //GenerateNaeveGPT();
-        GenerateErrorGPT();
+
+        //GenerateErrorGPT();
         // Añado esto porque he tenido problemas para que la partida no esté pausada al resetearse
         PauseMenu.gameIsPaused = false;
 
         //string message = "Lenguaje formal: /Mover/59.58,4.69\r\nLenguaje formal: /Empujar/portón";
         //cosa(message);
         //ProcesarComandos(message);
+
+        //Hablar(porton);
+
     }
 
     private void ProcesarComandos(string message)
@@ -177,18 +179,17 @@ public class TraductionLogic : MonoBehaviour
         {
             RaycastHit2D hit = onClick.GetPositionRay(Input.mousePosition);
 
-            if (hit.collider != null/* && hit.collider.CompareTag(tag)*/)
+            if (hit.collider != null)
             {
-                string tag = hit.collider.tag;
                 Debug.Log("Collider detectado:" + hit.collider.tag);
                 buildInteractionMsg(hit); // Llamamos a un función auxiliar para generar el mensaje y enviárselo a GPT.
             }
             else // No ha detectado ningún collider, click en el escenario
             {
                 // Podría poner un collider is trigger en el escenario y detecatarlo como el resto de cosas.
-                Debug.Log("Click en el escenario en la posición: " + hit.point);
+                Debug.Log("Click en el botón hablar.");
                 //StartCoroutine(SendAndHandleReply("Click en el escenario en la posición: " + hit.point));
-                buildOtherMsg("Click en el escenario en la posición: " + hit.point);
+                //buildOtherMsg("Click en el escenario.");
             }
         }
 
@@ -249,11 +250,44 @@ public class TraductionLogic : MonoBehaviour
         }
     }
 
+    // Cogemos los prompts de cada GPT y los activamos en SendAndHandleReply
     private async void GenerateErrorGPT()
     {
         string errorPrompt = promptManager.getErrorPrompt();
         errorControllerGPT.SetPrompt(errorPrompt);
         await SendAndHandleReplyError("");
+    }
+
+    private async Task GeneratePortonGPT()
+    {
+        string portonMsg = promptManager.getGatePrompt();
+        portonControllerGPT.SetPrompt(portonMsg);
+        Debug.Log("Prompt seteado, continuamos: " + portonMsg);
+        await SendAndHandleReplyPorton("");
+    }
+
+    private async void InitializePorton()
+    {
+        GameObject portonObj = GameObject.Find("NPC Chat");
+        if (portonObj != null)
+        {
+            portonControllerGPT = portonObj.GetComponent<GPTController>();
+
+            if (portonControllerGPT != null)
+            {
+                Debug.Log("Todo encontrado, continuamos");
+
+                await GeneratePortonGPT();
+            }
+            else
+            {
+                Debug.LogWarning("componente controller no encontrado");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("NPC Chat no encontrado");
+        }
     }
 
     // Construye el prompt cuando aparece el hombre del sombrero
@@ -420,6 +454,19 @@ public class TraductionLogic : MonoBehaviour
         errorReply = "";
     }
 
+    private async Task SendAndHandleReplyPorton(string msg)
+    {
+        portonReply = await portonControllerGPT.SendReply(msg);
+        while (string.IsNullOrEmpty(portonReply)) // Esperar hasta que la respuesta no esté vacía
+        {
+            await Task.Delay(10);
+        }
+        Debug.Log("Mensaje appendeado: " + portonReply);
+        portonControllerGPT.AppendMessage(portonReply);
+        portonControllerGPT.UpdateGPT();
+        portonReply = "";
+    }
+
     private void InitializeGameObjectDictionary()
     {
         objectDictionary.Add("paraguas", paraguas);
@@ -431,6 +478,8 @@ public class TraductionLogic : MonoBehaviour
         objectDictionary.Add("silla", silla);
         objectDictionary.Add("naeve", player);
         objectDictionary.Add("enemigo", enemy);
+        objectDictionary.Add("portón", porton);
+        objectDictionary.Add("cofre", cofre);
     }
 
     private void InitializeActionObjectLogic()
@@ -513,13 +562,29 @@ public class TraductionLogic : MonoBehaviour
         Debug.Log("Lógica para hablar con el ente: " + obj.name);
         if (isOnRange(obj))
         {
-            // Llamar a la clase para hablar con NPCs
+            switch (obj.tag)
+            {
+                case "Naeve":
+                    Debug.Log("Estás hablando contigo misma");
+                    break;
+                case "enemigo":
+                    Debug.Log("Estás hablando con el hombre del sombrero");
+                    break;
+                case "portón":
+                    Debug.Log("Estás hablando con el portón");
+                    InitializePorton();
+                    break;
+                default:
+                    Debug.Log("La entidad no existe");
+                    break;
+            }
+
         }
         else
         {
-            //string sendMsg = "Estás muy lejos del objeto. Muévete cerca del objeto antes";
-            //StartCoroutine(SendAndHandleReply(sendMsg));
-            Debug.Log("Acercate antes");
+            string sendMsg = "Estás muy lejos del objeto. Muévete cerca del objeto antes";
+            buildOtherMsg(sendMsg);
+            Debug.Log("Acercate al objeto antes");
         }
     }
 

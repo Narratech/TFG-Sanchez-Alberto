@@ -10,6 +10,7 @@ public class PauseMenu : MonoBehaviour
 
     public GameObject pauseMenuUI;
     public GameObject DeathMenuUI;
+    public GameObject TalkMenuUI;
 
     // Update is called once per frame
     void Update()
@@ -25,11 +26,27 @@ public class PauseMenu : MonoBehaviour
                 Pause();
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            if (!gameIsPaused)
+            {
+                TalkPause();
+            }
+        }
     }
 
     public void Resume()
     {
         pauseMenuUI.SetActive(false);
+        Time.timeScale = 1f;
+        gameIsPaused = false;
+        AudioListener.pause = false;
+    }
+
+    public void TalkResume()
+    {
+        TalkMenuUI.SetActive(false);
         Time.timeScale = 1f;
         gameIsPaused = false;
         AudioListener.pause = false;
@@ -46,6 +63,14 @@ public class PauseMenu : MonoBehaviour
     public void DeathPause()
     {
         DeathMenuUI.SetActive(true);
+        Time.timeScale = 0f;
+        gameIsPaused = true;
+        AudioListener.pause = true;
+    }
+
+    public void TalkPause()
+    {
+        TalkMenuUI.SetActive(true);
         Time.timeScale = 0f;
         gameIsPaused = true;
         AudioListener.pause = true;

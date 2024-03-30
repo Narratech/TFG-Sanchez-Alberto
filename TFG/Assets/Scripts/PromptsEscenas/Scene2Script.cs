@@ -15,7 +15,7 @@ public class Scene2Script : SceneScript
         if (!string.IsNullOrEmpty(allPrompts))
         {
             resumenPrompt = await promptManager.getResumenPrompt(allPrompts);
-            prompt = promptManager.getNarraevePrompt() + "Resumen de la escena anterior: " + resumenPrompt + "\n" + promptManager.getScene2Prompt();
+            prompt = promptManager.getNarraevePrompt() + "\nResumen de la escena anterior: " + resumenPrompt + "\n" + promptManager.getScene2Prompt();
 
         }
         else
