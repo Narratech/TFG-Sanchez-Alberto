@@ -37,16 +37,15 @@ namespace OpenAI
         //    button.onClick.AddListener(async () => await SendReply(reply));
         //}
 
-        public async void ButtonPulsedAsync()
-        {
-            string answer = inputField.text;
-            await SendReply(answer);
-        }
-
         // Añade el prompt específico de cada escena al prompt general. 
         public void SetPrompt(string newPrompt)
         {
             prompt += newPrompt;
+        }
+
+        public string GetInputField()
+        {
+            return inputField.text;
         }
 
         public void AppendMessage(string message)
@@ -81,13 +80,13 @@ namespace OpenAI
         {
 
             //Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
-            //if (this.name == "Naeve GPT" || this.name ==  "Action GPT")
-            //{
-            for (int i = 0; i < messages.Count; i++)
+            if (this.name == "Naeve GPT" || this.name == "Action GPT")
+            {
+                for (int i = 0; i < messages.Count; i++)
             {
                 Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
             }
-            //}
+            }
         }
 
         // Obtiene la respuesta ya parseada, que corresponde con las acciones a realizar

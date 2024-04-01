@@ -13,6 +13,7 @@ using TMPro;
 using Unity.Collections;
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
+using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
@@ -123,7 +124,7 @@ public class TraductionLogic : MonoBehaviour
         //ProcesarComandos(message);
 
         //Hablar(porton);
-
+        Levitar(player);
     }
 
     private void ProcesarComandos(string message)
@@ -413,7 +414,7 @@ public class TraductionLogic : MonoBehaviour
         }
 
         // Comprobamos que el formato sea correcto
-        await SendAndHandleReplyError(reply);
+        //await SendAndHandleReplyError(reply);
         //GetErrorReply();
 
         naeveText = reply;
@@ -421,14 +422,11 @@ public class TraductionLogic : MonoBehaviour
         string actionReply = await actionControllerGPT.SendReply(msgSend + "\n" + reply);
         Debug.Log("ACCION: " + actionReply);
 
-        // Parseamos el mensaje y obtenemos por un lado la acción y por el otro el texto en lenguaje natural
+        // Parseamos el mensaje y obtenemos la acción
         GetAction(actionReply);
 
-        //if (firstMessage)
-        //{
-        //    naeveText = "";
-        //    firstMessage = false;
-        //}
+        // Eliminamos contenido innecesario del mensaje de la narración de Naeve.
+        FormatNaeveText();
 
         naeveControllerGPT.AppendMessage(naeveText);
         actionControllerGPT.AppendMessage(actionText);
@@ -543,13 +541,15 @@ public class TraductionLogic : MonoBehaviour
                 obj.GetComponent<Rigidbody2D>().WakeUp();
             }
         }
-        
-
-        //Collider collider = obj.GetComponent<Collider>();
-        //if (collider != null)
-        //{
-        //    collider.isTrigger = false;
-        //}
+        else
+        {
+            Debug.Log("Lógica para caer el objeto: " + obj.name);
+            // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
+            target = new Vector2(obj.transform.position.x, -0.9f); // El target en este caso sería el suelo
+            moving = true;
+            objectMoving = obj;
+            MoveTowardsTarget(obj);
+        }
     }
 
     private void Esperar(GameObject obj)
@@ -611,12 +611,18 @@ public class TraductionLogic : MonoBehaviour
     {
         Debug.Log("Lógica para hacer levitar el objeto: " + obj.name);
         // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
+        Rigidbody2D body = obj.GetComponent<Rigidbody2D>();
+        if (body != null)
+        {
+            body.bodyType = RigidbodyType2D.Static;
+        }
         target = obj.transform.position; // El target pasa a ser un punto por encima del objeto
         target.y = obj.transform.position.y + 10f;
         moving = true;
         objectMoving = obj;
         MoveTowardsTarget(obj);
     }
+
 
     // Suelta el objeto en el mismo lugar en el que se cogió, ya que sólo lo desactivamos y lo activamos.
     private void Soltar(GameObject obj)
@@ -866,6 +872,15 @@ public class TraductionLogic : MonoBehaviour
         // Inicialización de las variables de salida
         actionText = string.Empty;
 
+        // Elimina la cadena "/accion" del mensaje ante la cantidad de errores que cometía de esta índole
+        List<string> palabrasAEliminar = new List<string> { "/accion", "/acción", "/Acción", "/Accion" };
+
+        // Itera sobre cada palabra en la lista y sustitúyela por una cadena vacía en el mensaje
+        foreach (string palabra in palabrasAEliminar)
+        {
+            message = message.Replace(palabra, "");
+        }
+
         // Ajuste en la expresión regular para capturar adecuadamente el patrón deseado.
         // Esta expresión captura '/Comando/parametros' seguido opcionalmente por otros caracteres,
         // pero solo nos interesan los grupos capturados antes del espacio o fin de la cadena.
@@ -877,6 +892,9 @@ public class TraductionLogic : MonoBehaviour
         // Limpieza final para eliminar caracteres no deseados, si es necesario.
         // Esta línea puede ser opcional dependiendo de si tu expresión regular ya asegura el formato deseado.
         actionText = Regex.Replace(actionText, @"[^\w\/,.]", "");
+
+        actionText = actionText.TrimEnd(',', ' ', '.', '"', '-', '_', '*', '/');
+
 
         // Usar expresiones regulares para encontrar la acción y el parámetro si existe
         //var match = Regex.Match(message, @"\/(\w+)(\/[^ ]*)?");
@@ -1171,5 +1189,27 @@ public class TraductionLogic : MonoBehaviour
             }
         }
     }
+
+    // Si hemos enviado un texto al GPT de manera manual, lo adquirimos el inputField de gptController y lo procesamos normalmente
+    public async void ButtonPulsedAsync()
+    {
+        string answer = naeveControllerGPT.GetInputField();
+        await SendAndHandleReply(answer);
+    }
+
+    private void FormatNaeveText()
+    {
+        Debug.Log("Texto antes del formateo: " + naeveText);
+
+        string patron = @"\(\s*\d+(\.\d+)?\s*,\s*\d+(\.\d+)?\s*\)";
+
+        // Utiliza Regex.Replace para reemplazar todos los números float entre paréntesis con una cadena vacía
+        naeveText = Regex.Replace(naeveText, patron, "");
+
+        // Imprime el texto resultante sin los números float entre paréntesis
+        Debug.Log("Texto después del formateo: " + naeveText);
+
+    }
+
 
 }

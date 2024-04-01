@@ -47,6 +47,7 @@ TagManager:
   - suelo
   - Naeve
   - "port\xF3n"
+  - talk
   layers:
   - Default
   - TransparentFX

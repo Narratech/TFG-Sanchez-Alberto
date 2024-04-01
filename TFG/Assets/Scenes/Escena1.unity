@@ -1159,7 +1159,6 @@ GameObject:
   - component: {fileID: 146153662}
   - component: {fileID: 146153661}
   - component: {fileID: 146153660}
-  - component: {fileID: 146153659}
   - component: {fileID: 146153663}
   - component: {fileID: 146153664}
   m_Layer: 11
@@ -1169,33 +1168,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!50 &146153659
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 146153658}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 2
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!61 &146153660
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1225,7 +1197,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: -0.015860915, y: 0}
@@ -1302,7 +1274,7 @@ Transform:
   m_GameObject: {fileID: 146153658}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10, y: 19.8, z: -1}
+  m_LocalPosition: {x: 2.21, y: 22.23, z: -1}
   m_LocalScale: {x: 0.67914, y: 0.67914, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4093,7 +4065,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pauseMenuUI: {fileID: 1020458941}
   DeathMenuUI: {fileID: 429501377}
-  TalkMenuUI: {fileID: 0}
+  TalkMenuUI: {fileID: 370156793}
 --- !u!1 &690199281
 GameObject:
   m_ObjectHideFlags: 0
@@ -5855,8 +5827,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: OpenAI.GPTController, Assembly-CSharp
+      - m_Target: {fileID: 153712827}
+        m_TargetAssemblyTypeName: TraductionLogic, Assembly-CSharp
         m_MethodName: ButtonPulsedAsync
         m_Mode: 1
         m_Arguments:
@@ -9246,7 +9218,7 @@ GameObject:
   - component: {fileID: 1168953385}
   m_Layer: 5
   m_Name: Hablar
-  m_TagString: Untagged
+  m_TagString: talk
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9295,7 +9267,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 627929787}
         m_TargetAssemblyTypeName: PauseMenu, Assembly-CSharp
         m_MethodName: TalkPause
         m_Mode: 1
@@ -9353,7 +9325,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1168953384}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -9}
   m_LocalScale: {x: 1.0000721, y: 1.0000721, z: 1.0000721}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9362,7 +9334,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -871.9, y: 486.97803}
+  m_AnchoredPosition: {x: -893.6, y: 504}
   m_SizeDelta: {x: 127.12, y: 63.66}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1185304211
@@ -12683,7 +12655,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 627929787}
         m_TargetAssemblyTypeName: PauseMenu, Assembly-CSharp
         m_MethodName: TalkResume
         m_Mode: 1
@@ -12694,18 +12666,6 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1168953384}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &1893787429
 MonoBehaviour:
@@ -13406,6 +13366,7 @@ GameObject:
   - component: {fileID: 2035986004}
   - component: {fileID: 2035986003}
   - component: {fileID: 2035986005}
+  - component: {fileID: 2035986006}
   m_Layer: 0
   m_Name: escenario
   m_TagString: escenario
@@ -13474,7 +13435,7 @@ Transform:
   m_GameObject: {fileID: 2035986002}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 39.6, y: 18, z: 1}
+  m_LocalPosition: {x: 38.7, y: 18.5, z: 1}
   m_LocalScale: {x: 4.7826414, y: 4.7826414, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13482,6 +13443,51 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &2035986005
 BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035986002}
+  m_Enabled: 0
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 19.2, y: 10.8}
+    newSize: {x: 38.407654, y: 18.81}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 19.2, y: 10.8}
+  m_EdgeRadius: 0
+--- !u!60 &2035986006
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -13522,9 +13528,35 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 19.2, y: 10.8}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: -7.908514, y: 5.402833}
+      - {x: -7.971704, y: 5.073116}
+      - {x: -7.9700885, y: 5.007963}
+      - {x: -7.9677954, y: 4.9154615}
+      - {x: -7.963033, y: 4.394481}
+      - {x: -8.293765, y: 4.4189143}
+      - {x: -9.31587, y: 4.4050665}
+      - {x: -9.471365, y: 4.374505}
+      - {x: -9.598902, y: 4.175657}
+      - {x: -9.433447, y: 4.3930497}
+      - {x: -8.025793, y: 4.402305}
+      - {x: -7.9380274, y: 4.367825}
+      - {x: -7.9673066, y: 4.914352}
+      - {x: -7.9753513, y: 5.072042}
+      - {x: -7.906486, y: 5.4451804}
+      - {x: -7.9816794, y: 5.0841646}
+      - {x: -7.966157, y: 4.9238424}
+      - {x: -7.95285, y: 4.3430786}
+      - {x: -7.9921026, y: 4.405715}
+      - {x: -8.192974, y: 4.404693}
+      - {x: -8.61803, y: 4.406766}
+      - {x: -9.194799, y: 4.419847}
+      - {x: -9.452113, y: 4.3661556}
+      - {x: -9.599999, y: -5.4}
+      - {x: 9.599999, y: -5.4}
+      - {x: 9.599999, y: 5.4}
+  m_UseDelaunayMesh: 0
 --- !u!1 &2055650308
 GameObject:
   m_ObjectHideFlags: 0
@@ -13538,7 +13570,7 @@ GameObject:
   - component: {fileID: 2055650309}
   m_Layer: 11
   m_Name: Mesa
-  m_TagString: Untagged
+  m_TagString: mesa
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13845,6 +13877,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 848917129}
     - target: {fileID: 7522344935561273237, guid: 1a8a2f3581138ba43b1d5ae4cad310fa, type: 3}
+      propertyPath: button
+      value: 
+      objectReference: {fileID: 964140817}
+    - target: {fileID: 7522344935561273237, guid: 1a8a2f3581138ba43b1d5ae4cad310fa, type: 3}
       propertyPath: textito
       value: 
       objectReference: {fileID: 729046355}
@@ -13852,6 +13888,10 @@ PrefabInstance:
       propertyPath: received
       value: 
       objectReference: {fileID: 342197580}
+    - target: {fileID: 7522344935561273237, guid: 1a8a2f3581138ba43b1d5ae4cad310fa, type: 3}
+      propertyPath: inputField
+      value: 
+      objectReference: {fileID: 1147647339}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13947,7 +13987,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7535817777252858664, guid: 409b7265903cecb4ebfc175e2aebde19, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2.2
+      value: -2.2
       objectReference: {fileID: 0}
     - target: {fileID: 7535817777252858664, guid: 409b7265903cecb4ebfc175e2aebde19, type: 3}
       propertyPath: m_LocalScale.y
@@ -13955,7 +13995,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7535817777252858664, guid: 409b7265903cecb4ebfc175e2aebde19, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.39
+      value: 10.43
       objectReference: {fileID: 0}
     - target: {fileID: 7535817777252858664, guid: 409b7265903cecb4ebfc175e2aebde19, type: 3}
       propertyPath: m_LocalPosition.y
@@ -14146,11 +14186,11 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
+  - {fileID: 627929783}
   - {fileID: 815260788}
   - {fileID: 1762017435}
   - {fileID: 16579802}
   - {fileID: 893046217}
-  - {fileID: 627929783}
   - {fileID: 5484706843383402694}
   - {fileID: 828353446}
   - {fileID: 974851824}
@@ -14166,7 +14206,6 @@ SceneRoots:
   - {fileID: 449319399}
   - {fileID: 1671508938}
   - {fileID: 1782602099}
-  - {fileID: 153712828}
   - {fileID: 33358432}
   - {fileID: 234661182}
   - {fileID: 2035986004}
@@ -14181,3 +14220,4 @@ SceneRoots:
   - {fileID: 292429950}
   - {fileID: 5896352197027005875}
   - {fileID: 1847782133}
+  - {fileID: 153712828}
