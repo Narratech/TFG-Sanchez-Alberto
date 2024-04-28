@@ -1,11 +1,14 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class EnemyController : MonoBehaviour
 {
-    private float speed = 2f;
+    private float baseSpeed = 2f;
+    private float targetSpeed = 8f; // Velocidad máxima (cuatriplicada)
+    private float currentSpeed;
+    private float accelerationTime = 10f; // Tiempo en segundos para acelerar
+    private float accelerationTimer = 0f;
+    private Vector2 target;
 
     private void Start()
     {
@@ -14,25 +17,32 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
-        // Verifica si el jugador ha cruzado la coordenada de activación para aparecer en la escena
         if (gameObject.activeSelf)
         {
-            Mover(gameObject);
-            // Si el enemigo ya está activado, lo movemos hasta la mesa.
+            Move(gameObject);
         }
     }
-    void Mover(GameObject obj)
+
+    void Move(GameObject obj)
     {
-        // VINCULAR LA POSICIÓN CON LA MESA
-        // Creamos el vector 2D con las posiciones del objetivo al que va el enemigo (la mesa)
-        Vector2 target = new Vector2(60, 0); 
-        MoveTowardsTarget(obj, target);
+        target = new Vector2(-51, 9);
+        MoveTowardsTarget(obj);
     }
 
-    private void MoveTowardsTarget(GameObject obj, Vector2 target)
+    private void MoveTowardsTarget(GameObject obj)
     {
-        float step = speed * Time.deltaTime;
+        accelerationTimer += Time.deltaTime;
+
+        // Acelera gradualmente durante el tiempo especificado
+        currentSpeed = Mathf.Lerp(baseSpeed, targetSpeed, accelerationTimer / accelerationTime);
+
+        float step = currentSpeed * Time.deltaTime;
         obj.transform.position = Vector2.MoveTowards(obj.transform.position, target, step);
-    }
 
+        if ((Vector2)obj.transform.position == target)
+        {
+            gameObject.SetActive(false);
+        }
+    }
 }
+

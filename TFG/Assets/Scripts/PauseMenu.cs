@@ -9,8 +9,10 @@ public class PauseMenu : MonoBehaviour
     public static bool gameIsPaused = false;
 
     public GameObject pauseMenuUI;
-    public GameObject DeathMenuUI;
-    public GameObject TalkMenuUI;
+    public GameObject deathMenuUI;
+    public GameObject talkMenuUI;
+    public GameObject inventoryMenuUI;
+    public GameObject dialogueBox;
 
     // Update is called once per frame
     void Update()
@@ -19,11 +21,11 @@ public class PauseMenu : MonoBehaviour
         {
             if (gameIsPaused)
             {
-                Resume();
+                Resume(pauseMenuUI);
             }
             else
             {
-                Pause();
+                Pause(pauseMenuUI);
             }
         }
 
@@ -31,49 +33,35 @@ public class PauseMenu : MonoBehaviour
         {
             if (!gameIsPaused)
             {
-                TalkPause();
+                Pause(talkMenuUI);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            if (!gameIsPaused)
+            {
+                Pause(inventoryMenuUI);
             }
         }
     }
 
-    public void Resume()
+    public void Resume(GameObject menu)
     {
-        pauseMenuUI.SetActive(false);
+        menu.SetActive(false);
         Time.timeScale = 1f;
         gameIsPaused = false;
         AudioListener.pause = false;
+        dialogueBox.SetActive(true);
     }
 
-    public void TalkResume()
+    public void Pause(GameObject menu)
     {
-        TalkMenuUI.SetActive(false);
-        Time.timeScale = 1f;
-        gameIsPaused = false;
-        AudioListener.pause = false;
-    }
-
-    public void Pause()
-    {
-        pauseMenuUI.SetActive(true);
+        menu.SetActive(true);
         Time.timeScale = 0f;
         gameIsPaused = true;
         AudioListener.pause = true;
-    }
-
-    public void DeathPause()
-    {
-        DeathMenuUI.SetActive(true);
-        Time.timeScale = 0f;
-        gameIsPaused = true;
-        AudioListener.pause = true;
-    }
-
-    public void TalkPause()
-    {
-        TalkMenuUI.SetActive(true);
-        Time.timeScale = 0f;
-        gameIsPaused = true;
-        AudioListener.pause = true;
+        dialogueBox.SetActive(false);
     }
 
     public void LoadMenu()
@@ -90,7 +78,7 @@ public class PauseMenu : MonoBehaviour
 
     public void ResetGame()
     {
-        Resume();
+        Resume(pauseMenuUI);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         UnsetGameIsPaused();
     }

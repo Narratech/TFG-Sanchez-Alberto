@@ -6,15 +6,22 @@ public class Utilizador
 {
     public void Utilizar(GameObject objeto)
     {
-        IUtilizable utilizable = objeto.GetComponent<IUtilizable>();
-        if (utilizable != null)
+        if (objeto != null)
         {
-            utilizable.Utilizar();
+            IUtilizable utilizable = objeto.GetComponent<IUtilizable>();
+            if (utilizable != null)
+            {
+                utilizable.Utilizar();
+            }
+            else
+            {
+                Debug.Log("El objeto no implementa la interfaz IUtilizable.");
+            }
         }
         else
         {
-            Debug.Log("El objeto no implementa la interfaz IUtilizable.");
+            Debug.Log("El objeto ha sido destruido");
         }
+        
     }
 }
-

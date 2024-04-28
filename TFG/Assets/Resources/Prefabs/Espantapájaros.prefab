@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8452164061507164133}
   - component: {fileID: 6893816547260582598}
   - component: {fileID: 7097207166607272828}
+  - component: {fileID: 945003355039844026}
   m_Layer: 0
   m_Name: "Espantap\xE1jaros"
   m_TagString: "espantap\xE1jaros"
@@ -130,3 +131,15 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.89619064, y: 2.8125}
   m_EdgeRadius: 0
+--- !u!114 &945003355039844026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7224328217579674249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd4a2ef759076834fb9fb1f9c2f5ef75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

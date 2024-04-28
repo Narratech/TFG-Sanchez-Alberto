@@ -18,6 +18,9 @@ namespace OpenAI
         [SerializeField] public RectTransform received;
         [SerializeField] public TMP_InputField inputField;
         [SerializeField] public Button button;
+        public GameObject dialogueBox;
+        public GameObject portonChat;
+        public GameObject estatuaChat;
 
         //private static GPTController _instance;
 
@@ -26,8 +29,6 @@ namespace OpenAI
         private List<ChatMessage> messages = new();
         private ChatMessage answer;
         private bool newMsgSend;
-        private string actionText;
-        private string naeveText;
 
         private string prompt = "";
 
@@ -50,7 +51,47 @@ namespace OpenAI
 
         public void AppendMessage(string message)
         {
-            textito.SetText(message);
+            // Ignoro el primer mensaje
+            if (messages.Count > 2)
+            {
+                if (this.name == "Naeve GPT")
+                {
+                    dialogueBox.SetActive(true);
+                    DialogueController dialogueController = dialogueBox.GetComponent<DialogueController>();
+                    if (dialogueController != null)
+                    {
+                        Debug.Log("Hablamos con Naeve");
+                        dialogueController.DeleteLastMsg();
+                        dialogueController.StartDialogue(message);
+                    }
+                }
+                else if (this.name == "NPC Chat")
+                {
+                    portonChat.SetActive(true);
+                    DialogueController dialogueController = portonChat.GetComponent<DialogueController>();
+                    if (dialogueController != null)
+                    {
+                        dialogueController.DeleteLastMsg();
+                        dialogueController.StartDialogue(message);
+                    }
+
+                }
+                else if (this.name == "Estatua Chat")
+                {
+                    estatuaChat.SetActive(true);
+                    DialogueController dialogueController = estatuaChat.GetComponent<DialogueController>();
+                    if (dialogueController != null)
+                    {
+                        dialogueController.DeleteLastMsg();
+                        dialogueController.StartDialogue(message);
+                    }
+                }
+
+                else
+                {
+                    textito.SetText(message);
+                }
+            }
         }
 
         // Función para devolver toda la conversación. La usaré con el GPT de Naeve para mandárselo al GPT resumidor. Comienzo en el mensaje 2 ya que no me interesa volver a mandarle todo el contexto ni la primera respuesta de GPT.
@@ -80,20 +121,16 @@ namespace OpenAI
         {
 
             //Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
-            if (this.name == "Naeve GPT" || this.name == "Action GPT")
-            {
-                for (int i = 0; i < messages.Count; i++)
-            {
-                Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
-            }
-            }
+            //if (this.name == "Naeve GPT" || this.name == "Action GPT")
+            //{
+            //for (int i = 0; i < messages.Count; i++)
+            //{
+            //    Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
+            //}
+            //}
         }
 
         // Obtiene la respuesta ya parseada, que corresponde con las acciones a realizar
-        public string GetAnswer()
-        {
-            return actionText;
-        }
 
         public async Task<string> SendReply(string text/*, string click*/)
         {
@@ -108,7 +145,7 @@ namespace OpenAI
             messages.Add(newMessage);
 
             // Si tenemos inputField y botón en este GPT, los desactivamos y reseteamos el texto para que no se puedan utilizar durante la comunicación
-            if (inputField != null && button != null) 
+            if (inputField != null && button != null)
             {
                 button.enabled = false;
                 inputField.text = "";

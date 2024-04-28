@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7518425864736825552}
   - component: {fileID: 5039285991373007473}
   - component: {fileID: 6730764864906847470}
+  - component: {fileID: -4955027308682159306}
   m_Layer: 0
   m_Name: Bola de pinchos
   m_TagString: bola de pinchos
@@ -158,3 +159,15 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-4955027308682159306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7562441550520056410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd4a2ef759076834fb9fb1f9c2f5ef75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

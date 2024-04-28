@@ -1,9 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LogicController
+public class LogicController : MonoBehaviour
 {
+
+    public static LogicController Instance;
     private List<Transform> bodyParts = new List<Transform>();
+    //public Item item;
+
+    public void Awake()
+    {
+        Instance = this;
+    }
+
+    // función lógica para recoger los objetos y que se muestren en el inventario
+    //public void Pickup(GameObject obj)
+    //{
+    //    InventoryController.Instance.Add(item);
+    //    Destroy(obj);
+    //}
 
     public void SetBodyParts(Transform transform) 
     {

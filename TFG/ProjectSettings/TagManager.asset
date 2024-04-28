@@ -48,6 +48,7 @@ TagManager:
   - Naeve
   - "port\xF3n"
   - talk
+  - portal
   layers:
   - Default
   - TransparentFX
@@ -58,7 +59,7 @@ TagManager:
   - Backray
   - lluvia
   - hidden
-  - 
+  - Naeve
   - Background
   - objetos
   - 
@@ -94,11 +95,17 @@ TagManager:
   - name: backFront
     uniqueID: 2013057887
     locked: 0
+  - name: suelo
+    uniqueID: 422766081
+    locked: 0
   - name: lluvia
     uniqueID: 2194929479
     locked: 0
-  - name: suelo
-    uniqueID: 422766081
+  - name: Naeve
+    uniqueID: 166023065
+    locked: 0
+  - name: Front
+    uniqueID: 2845847607
     locked: 0
   - name: UI
     uniqueID: 3967002135

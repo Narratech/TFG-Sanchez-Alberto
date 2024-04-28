@@ -6,7 +6,7 @@ public class DialogFollow : MonoBehaviour
 {
     public Transform characterTransform; // Referencia al transform del personaje
     public Transform dialogBoxTransform; // Referencia al transform del cuadro de diálogo
-    private Vector3 offset = new Vector3(-4.5f, 16f, 0.0f); // Offset inicial en X, Y
+    public Vector3 offset = new Vector3(0.5f, 16f, 0.0f); // Offset inicial en X, Y
 
 
     void Update()

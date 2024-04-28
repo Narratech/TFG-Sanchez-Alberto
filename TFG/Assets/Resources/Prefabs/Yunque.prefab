@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4662434236626443423}
   - component: {fileID: 3852201365367937364}
   - component: {fileID: 1836401490557998069}
+  - component: {fileID: -9219806141043222420}
   m_Layer: 0
   m_Name: Yunque
   m_TagString: yunque
@@ -158,3 +159,15 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-9219806141043222420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4211254085889346523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd4a2ef759076834fb9fb1f9c2f5ef75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

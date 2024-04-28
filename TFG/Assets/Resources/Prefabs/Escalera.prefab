@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3488918854173732632}
   - component: {fileID: 9134500792686224831}
   - component: {fileID: 4068360092264880499}
+  - component: {fileID: 3406818006363015561}
   m_Layer: 0
   m_Name: Escalera
   m_TagString: escalera
@@ -143,3 +144,15 @@ PolygonCollider2D:
       - {x: 0.6875, y: 0.5625}
       - {x: 0.21875, y: 0.5625}
   m_UseDelaunayMesh: 0
+--- !u!114 &3406818006363015561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7024798193978331989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd4a2ef759076834fb9fb1f9c2f5ef75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

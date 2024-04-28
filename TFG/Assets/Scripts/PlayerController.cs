@@ -1,150 +1,95 @@
-using OpenAI;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
-    // Start is called before the first frame update
+    private float horizontal;
+    private float speed = 12f;
+    private float jumpingPower = 18f;
+    private bool isFacingRight = false;
 
-    //private float speed = 5f;
-    //private Vector3 positionToMove;
+    public static bool playerControl = false;
 
-    //public void Move(Vector3 mousePosition)
-    //{
-    //    positionToMove = Camera.main.ScreenToWorldPoint(mousePosition);
-    //    positionToMove.z = transform.position.z;
-    //    positionToMove.y = transform.position.y;
-    //    transform.position = Vector3.MoveTowards(transform.position, positionToMove, speed * Time.deltaTime);
-    //}
+    [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Animator naeveAnimator;
+    private bool isJumping;
 
-    //private ResponseTraduction tradutionRes = new ResponseTraduction();
-    //private OpenAIApi openai = new OpenAIApi();
-    //private List<ChatMessage> messages = new List<ChatMessage>();
-    //private string answer;
-    //private bool moveAllowed = false;
-    //private Vector3 target;
-
-    //private string prompt = "Rol y objetivo: Soy \"Naeve IA\", la inteligencia artificial de Naeve, una niña de 11 años en un videojuego en 2D. Respondo a las acciones del jugador con las decisiones de Naeve, sin tener conciencia de estar en un juego. Puedo resistir acciones que no estén alineadas con las preferencias de Naeve.\r\nContexto: Los padres de Naeve han sido asesinados por un hombre siniestro con sombrero. Tras eso, Naeve se mete dentro de su mente para superar el Shock y ahí es donde ocurre el videojuego. El escenario es oscuro y tormentoso. Los objetos más queridos de Naeve son un cómic que le regaló su padre y un paraguas rojo de su madre.\r\nRestricciones: No continúo la historia ni creo detalles del escenario. Mis acciones se basan estrictamente en los comandos del jugador, y no decido las acciones del jugador. Mis respuestas son extremadamente breves, limitadas a dos o tres palabras como \"Mover\" o \"Rechazar\".\r\nDirectrices: Actúo en base a los comandos del jugador, manteniendo consistencia con el personaje de Naeve, quien está en un estado de miedo. Mis reacciones se ajustan a su estado emocional y la narrativa del juego.\r\nAclaración: Ante comandos poco claros, pido aclaración para asegurar acciones apropiadas y contextualizadas.\r\nPersonalización: Mi tono es temeroso, acorde al estado emocional de Naeve. Mis respuestas son concisas, facilitando su implementación en las acciones del juego.";
-
-    //public async void SendReply(string text /*, Vector3 mousePosition*/)
-    //{
-    //    var newMessage = new ChatMessage()
-    //    {
-    //        Role = "user",
-    //        Content = /* texto a enviar a chatgpt*/ text
-    //    };
-
-    //    if (messages.Count == 0) newMessage.Content = prompt + "\n" + /* texto a enviar a chatgpt*/ text;
-
-    //    messages.Add(newMessage);
-
-    //    // Complete the instruction
-    //    var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest()
-    //    {
-    //        Model = "gpt-3.5-turbo-0613",
-    //        Messages = messages
-    //    });
-
-    //    if (completionResponse.Choices != null && completionResponse.Choices.Count > 0)
-    //    {
-    //        var message = completionResponse.Choices[0].Message;
-    //        message.Content = message.Content.Trim();
-
-    //        Traduce(message /*, mousePosition*/); // Llama a traduce para traducir el mensaje a una acción.
-
-    //        messages.Add(message);
-    //    }
-    //    else
-    //    {
-
-    //        Debug.LogWarning("No text was generated from this prompt.");
-    //    }
-
-    //}
-
-    //public void Traduce(ChatMessage message/*, Vector3 mousePosition*/)
-    //{
-    //    // Guardamos el contenido del mensaje de ChatGPT
-    //    string content = message.Content.ToLower();
-    //    Debug.Log("GPT: " + content);
-
-    //    // Si el mensaje es "mover", movemos a Naeve a la posición donde ha sido el click
-    //    // Tendríamos que obtener la posición del click del ratón, habiéndola guardado previamente
-    //    if (content.Contains("mover") || content.Contains("mueve"))
-    //    {
-    //        // Movemos a Naeve
-    //        Debug.Log("Naeve se moveria");
-    //        moveAllowed = true;
-    //        //Move(mousePosition);
-    //        // PlayerController.Move(mousePosition);
-    //        // Devolvemos true si lo que quería era moverse
-    //    }
-    //    else if (content.Contains("esconder") || content.Contains("esconderse"))
-    //    {
-    //        // Habría que saber donde se esconde Naeve, dependiendo esto de la escena.
-    //        // También podría darse la posibilidad de que Naeve no pueda esconderse
-    //    }
-    //    else
-    //    {
-    //        Debug.Log("levanta la cabeza, confusa");
-    //        // Si no se cumple ninguna, Naeve solo levantaría la cabeza
-    //    }
-
-    //}
-
-    // Update is called once per frame
     void Update()
     {
-        //if(Input.GetMouseButtonDown(0))
-        //{
-        //    target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //    target.z = transform.position.z;
-        //    target.y = transform.position.y;
+        if (PauseMenu.gameIsPaused) // Asumiendo que isGamePaused es una variable estática o accesible globalmente
+        {
+            return; // Ignora el resto del código en Update si el juego está pausado
+        }
+        if (playerControl)
+        {
+            horizontal = Input.GetAxisRaw("Horizontal");
 
-        //    //SendReply("el jugador hace click a la derecha de Naeve");
-        //}
-        ////transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
-        ////transform.position = target;
+            if (!IsGrounded())
+            {
+                naeveAnimator.SetBool("isJump", true);
+                isJumping = true;
+            }
 
-        //while (moveAllowed)
-        //{
-        //    transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
-        //    if (transform.position == target)
-        //    {
-        //        moveAllowed = false;
-        //    }
-        //}
+            // Activar la animación de salto cuando se detecta un salto y el personaje está en el suelo
+            if (Input.GetButtonDown("Jump") && IsGrounded())
+            {
+                rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
+                naeveAnimator.SetBool("isJump", true);
+                isJumping = true;
+            }
 
+            // Activar la animación de correr cuando el personaje se está moviendo horizontalmente
 
-        //if (Input.GetKey(KeyCode.A))
-        //{
-        //    gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(-8000f * Time.deltaTime, 0));
-        //}
+            naeveAnimator.SetBool("isRun", (Mathf.Abs(horizontal) > 0f && !isJumping));
 
-        //if (Input.GetKey(KeyCode.D))
-        //{
-        //    gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(8000f * Time.deltaTime, 0));
-        //}
+            if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+            }
 
-        //if (Input.GetKey(KeyCode.S))
-        //{
-        //    // Agacharse
-        //}
+            if (isJumping)
+            {
+                // Introduzco un pequeño retraso para que le de tiempo a comenzar a saltar antes de comprobar si Naeve no está en el suelo. Ya que, de otro modo, se desactiva inmediatamente la animación
+                Invoke("CheckGroundedAfterJump", 0.1f);
+            }
 
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, 4000f));
-        //}
+            Flip();
+        }
+        
     }
-    //private void OnMouseDown()
-    //{
-    //    Debug.Log(Input.mousePosition);
-    //    Vector3 pos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    //    pos.z = gameObject.GetComponent<Transform>().position.z;
-    //    pos.y = gameObject.GetComponent<Transform>().position.y;
-    //    gameObject.GetComponent<Transform>().position = pos;
-    //    Debug.Log("adios");
-    //}
 
+    private void FixedUpdate()
+    {
+        if (playerControl)
+        {
+            rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+        }
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+    }
+
+    private void CheckGroundedAfterJump()
+    {
+        if (IsGrounded())
+        {
+            naeveAnimator.SetBool("isJump", false);
+            isJumping = false;
+        }
+    }
+
+
+    private void Flip()
+    {
+        if (isFacingRight && horizontal < 0f || !isFacingRight && horizontal > 0f)
+        {
+            isFacingRight = !isFacingRight;
+            Vector3 localScale = transform.localScale;
+            localScale.x *= -1f;
+            transform.localScale = localScale;
+        }
+    }
 }

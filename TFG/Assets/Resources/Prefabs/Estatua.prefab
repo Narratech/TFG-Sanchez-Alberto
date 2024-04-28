@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2645165596320657162}
   - component: {fileID: 27491573056602055}
   - component: {fileID: 240436448584648869}
+  - component: {fileID: 4397835274966410395}
   m_Layer: 0
   m_Name: Estatua
   m_TagString: estatua
@@ -130,3 +131,15 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.09375, y: 2.40625}
   m_EdgeRadius: 0
+--- !u!114 &4397835274966410395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5894304339737518585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd4a2ef759076834fb9fb1f9c2f5ef75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

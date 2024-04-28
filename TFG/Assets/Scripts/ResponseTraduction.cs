@@ -33,6 +33,7 @@ public class TraductionLogic : MonoBehaviour
     public GPTController errorControllerGPT;
     //public GPTController resumenControllerGPT;
     public GPTController portonControllerGPT;
+    public GPTController estatuaControllerGPT;
 
     public GameObject canvasObj;
 
@@ -48,9 +49,12 @@ public class TraductionLogic : MonoBehaviour
     public GameObject silla;
     public GameObject vela;
     public GameObject cofre;
+    public GameObject estatua;
+    public GameObject arbol;
 
     public GameObject teleportVFX;
     public GameObject explosionVFX;
+    public GameObject portalVFX;
 
     private Animator naeveAnimator;
 
@@ -62,7 +66,7 @@ public class TraductionLogic : MonoBehaviour
 
     private string reply = "";
     private string errorReply = "";
-    private string portonReply = "";
+    private string chatReply = "";
     private string correction = "";
     private bool errorTrigger = false;
 
@@ -84,20 +88,22 @@ public class TraductionLogic : MonoBehaviour
     private GameObject objectMoving = null;
     private GameObject objectInvisible = null;
 
+    public GameObject deathMenuUI;
+
     private int groundLayerMask;
 
     private float speed = 10f;
     private float jumpForce = 700f;
     private bool isJumping = false;
-    private const float interactionRange = 13f; // Rango de interacción con los objetos
+    private const float interactionRange = 11f; // Rango de interacción con los objetos
 
     private bool paraguasActivated = false;
 
     // Abecedario del lenguaje formal, dividido en acciones, objetos y entidades
-    private string[] actions = { "coger", "mover", "transformar", "vibrar", "desaparecer", "menguar", "crecer", "explotar", "atacar", "esconderse", "atraer", "teletransportar", "soltar", "levitar", "materializar", "utilizar", "saltar", "hablar", "esperar", "caer", "invisibilizar" };
-    private string[] objects = { "paraguas", "cómic", "tronco", "sofá", "mesa", "vela", "silla" };
-    private string[] entities = { "Naeve", "enemigo", "portón" };
-    private string[] objectsNoScene = { "llave", "puerta", "linterna" };
+    private string[] actions = { "coger", "mover", "transformar", "vibrar", "desaparecer", "menguar", "crecer", "explotar", "atacar", "esconderse", "atraer", "teletransportar", "soltar", "levitar", "materializar", "utilizar", "saltar", "hablar", "esperar", "caer", "invisibilizar", "controlar"};
+    private string[] objects = { "paraguas", "cómic", "tronco", "sofá", "mesa", "vela", "silla", "cofre", "árbol"};
+    private string[] entities = { "Naeve", "enemigo", "portón", "estatua" };
+    private string[] objectsNoScene = { "llave", "puerta", "linterna"};
     //private GameObject[] gameObjectList = { player, comic, paraguas };
     private List<string> inventory = new();
     // Diccionario con la correspondencia string-gameobject para cada objeto y ente
@@ -115,6 +121,8 @@ public class TraductionLogic : MonoBehaviour
         groundLayerMask = LayerMask.GetMask("suelo");
         logicController.SetBodyParts(player.transform);
 
+        InitializePorton();
+        InitializeEstatua();
         //GenerateErrorGPT();
         // Añado esto porque he tenido problemas para que la partida no esté pausada al resetearse
         PauseMenu.gameIsPaused = false;
@@ -123,8 +131,9 @@ public class TraductionLogic : MonoBehaviour
         //cosa(message);
         //ProcesarComandos(message);
 
+        //Esconderse(sofa);
         //Hablar(porton);
-        Levitar(player);
+        //Levitar(player);
     }
 
     private void ProcesarComandos(string message)
@@ -176,6 +185,13 @@ public class TraductionLogic : MonoBehaviour
             buildEnemyPrompt(); // Llamamos a un función auxiliar para generar el mensaje y enviárselo a GPT.
 
         }
+
+        if (PlayerMovement.playerControl)
+        {
+            Debug.Log("JUEGO CONTROLADO");
+            return; // Ignora el resto del código en Update si el juego está siendo controlado por el jugador
+        }
+
         if (Input.GetMouseButtonDown(0) && !moving)
         {
             RaycastHit2D hit = onClick.GetPositionRay(Input.mousePosition);
@@ -183,6 +199,10 @@ public class TraductionLogic : MonoBehaviour
             if (hit.collider != null)
             {
                 Debug.Log("Collider detectado:" + hit.collider.tag);
+                if (hit.collider.tag == "portal")
+                {
+                    EndGame();
+                }
                 buildInteractionMsg(hit); // Llamamos a un función auxiliar para generar el mensaje y enviárselo a GPT.
             }
             else // No ha detectado ningún collider, click en el escenario
@@ -223,12 +243,11 @@ public class TraductionLogic : MonoBehaviour
         }
         else
         {
-            if (isOnRange(enemy) && enemy.activeSelf)
+            if (isOnRange(enemy) && enemy.activeSelf && enemy.layer == player.layer)
             {
                 NaeveDeath();
             }
         }
-
     }
 
     public void ActivateParaguas()
@@ -264,30 +283,46 @@ public class TraductionLogic : MonoBehaviour
         string portonMsg = promptManager.getGatePrompt();
         portonControllerGPT.SetPrompt(portonMsg);
         Debug.Log("Prompt seteado, continuamos: " + portonMsg);
-        await SendAndHandleReplyPorton("");
+        await SendAndHandleReplyNPC(portonControllerGPT, "");
+    }
+
+    private async Task GenerateEstatuaGPT()
+    {
+        string estatuaMsg = promptManager.getStatuePrompt();
+        estatuaControllerGPT.SetPrompt(estatuaMsg);
+        Debug.Log("Prompt seteado, continuamos: " + estatuaMsg);
+        await SendAndHandleReplyNPC(estatuaControllerGPT, "");
     }
 
     private async void InitializePorton()
     {
-        GameObject portonObj = GameObject.Find("NPC Chat");
-        if (portonObj != null)
-        {
-            portonControllerGPT = portonObj.GetComponent<GPTController>();
+        //GameObject portonObj = GameObject.Find("NPC Chat");
+        //if (portonObj != null)
+        //{
+        //    portonControllerGPT = portonObj.GetComponent<GPTController>();
 
             if (portonControllerGPT != null)
             {
-                Debug.Log("Todo encontrado, continuamos");
+                //Debug.Log("Todo encontrado, continuamos");
 
                 await GeneratePortonGPT();
             }
-            else
-            {
-                Debug.LogWarning("componente controller no encontrado");
-            }
-        }
-        else
+        //    else
+        //    {
+        //        Debug.LogWarning("componente controller no encontrado");
+        //    }
+        //}
+        //else
+        //{
+        //    Debug.LogWarning("NPC Chat no encontrado");
+        //}
+    }
+
+    private async void InitializeEstatua()
+    {
+        if (estatuaControllerGPT != null)
         {
-            Debug.LogWarning("NPC Chat no encontrado");
+            await GenerateEstatuaGPT();
         }
     }
 
@@ -335,7 +370,7 @@ public class TraductionLogic : MonoBehaviour
         if (hidden)
         {
             // Volvemos a cambiar las layers a Default
-            logicController.ChangeLayer(player.transform, 0, "Default");
+            logicController.ChangeLayer(player.transform, 9, "Naeve");
             hidden = false;
         }
 
@@ -452,17 +487,23 @@ public class TraductionLogic : MonoBehaviour
         errorReply = "";
     }
 
-    private async Task SendAndHandleReplyPorton(string msg)
+    private async Task SendAndHandleReplyNPC(GPTController chatController, string msg)
     {
-        portonReply = await portonControllerGPT.SendReply(msg);
-        while (string.IsNullOrEmpty(portonReply)) // Esperar hasta que la respuesta no esté vacía
+        chatReply = await chatController.SendReply(msg);
+        while (string.IsNullOrEmpty(chatReply)) // Esperar hasta que la respuesta no esté vacía
         {
             await Task.Delay(10);
         }
-        Debug.Log("Mensaje appendeado: " + portonReply);
-        portonControllerGPT.AppendMessage(portonReply);
-        portonControllerGPT.UpdateGPT();
-        portonReply = "";
+        Debug.Log("Mensaje appendeado: " + chatReply);
+        chatController.AppendMessage(chatReply);
+        chatController.UpdateGPT();
+        // Si el NPC es el portón buscamos la cadena "[Abierta]"
+        if (chatController == portonControllerGPT)
+        {
+            Debug.Log("Estamos donde hay que estar");
+            GetPortonKey(chatReply);
+        }
+        chatReply = "";
     }
 
     private void InitializeGameObjectDictionary()
@@ -478,6 +519,9 @@ public class TraductionLogic : MonoBehaviour
         objectDictionary.Add("enemigo", enemy);
         objectDictionary.Add("portón", porton);
         objectDictionary.Add("cofre", cofre);
+        objectDictionary.Add("Naeve", player);
+        objectDictionary.Add("estatua", estatua);
+        objectDictionary.Add("árbol", arbol);
     }
 
     private void InitializeActionObjectLogic()
@@ -505,9 +549,10 @@ public class TraductionLogic : MonoBehaviour
         actionObjectLogic.Add("esperar", Esperar); // HECHO
         actionObjectLogic.Add("caer", Caer); // HECHO
         actionObjectLogic.Add("invisibilizar", Invisibilizar); // HECHO
+        actionObjectLogic.Add("controlar", Controlar); // HECHO
     }
 
-    void ExecuteActionObjectLogic(string action, GameObject obj)
+    private void ExecuteActionObjectLogic(string action, GameObject obj)
     {
         string key = action;
         if (actionObjectLogic.ContainsKey(key))
@@ -522,34 +567,65 @@ public class TraductionLogic : MonoBehaviour
 
     private void Invisibilizar(GameObject obj)
     {
-        if (!invisible)
+        if (obj != null)
         {
-            invisible = true;
-            objectInvisible = obj;
-            InvisibleTarget(obj);
+            if (!invisible)
+            {
+                invisible = true;
+                objectInvisible = obj;
+                InvisibleTarget(obj);
+            }
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+    }
+
+    private void Controlar(GameObject obj)
+    {
+        if (obj != null)
+        {
+            if (!PlayerMovement.playerControl)
+            {
+                PlayerMovement.playerControl = true;
+            }
+            else
+            {
+                PlayerMovement.playerControl = false;
+            }
+            
         }
     }
 
     // Si el objeto tiene rigidbody que está desactivado, lo activa. De esta forma el objeto caerá
     private void Caer(GameObject obj)
     {
-        Rigidbody2D body = obj.GetComponent<Rigidbody2D>();
-        if (body != null)
+        if (obj != null)
         {
-            if (obj.GetComponent<Rigidbody2D>().IsSleeping())
+            Rigidbody2D body = obj.GetComponent<Rigidbody2D>();
+            if (body != null)
             {
-                obj.GetComponent<Rigidbody2D>().WakeUp();
+                if (obj.GetComponent<Rigidbody2D>().IsSleeping())
+                {
+                    obj.GetComponent<Rigidbody2D>().WakeUp();
+                }
+            }
+            else
+            {
+                Debug.Log("Lógica para caer el objeto: " + obj.name);
+                // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
+                target = new Vector2(obj.transform.position.x, -0.9f); // El target en este caso sería el suelo
+                moving = true;
+                objectMoving = obj;
+                MoveTowardsTarget(obj);
             }
         }
         else
         {
-            Debug.Log("Lógica para caer el objeto: " + obj.name);
-            // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
-            target = new Vector2(obj.transform.position.x, -0.9f); // El target en este caso sería el suelo
-            moving = true;
-            objectMoving = obj;
-            MoveTowardsTarget(obj);
+            Debug.Log("El objeto ha sido destruido");
         }
+        
     }
 
     private void Esperar(GameObject obj)
@@ -559,211 +635,328 @@ public class TraductionLogic : MonoBehaviour
 
     private void Hablar(GameObject obj)
     {
-        Debug.Log("Lógica para hablar con el ente: " + obj.name);
-        if (isOnRange(obj))
+        if (obj != null)
         {
-            switch (obj.tag)
-            {
-                case "Naeve":
-                    Debug.Log("Estás hablando contigo misma");
-                    break;
-                case "enemigo":
-                    Debug.Log("Estás hablando con el hombre del sombrero");
-                    break;
-                case "portón":
-                    Debug.Log("Estás hablando con el portón");
-                    InitializePorton();
-                    break;
-                default:
-                    Debug.Log("La entidad no existe");
-                    break;
-            }
+            Debug.Log("Lógica para hablar con el ente: " + obj.name);
+            //if (isOnRange(obj))
+            //{
+                switch (obj.tag)
+                {
+                    case "Naeve":
+                        Debug.Log("Estás hablando contigo misma");
+                        break;
+                    case "enemigo":
+                        Debug.Log("Estás hablando con el hombre del sombrero");
+                        break;
+                    case "portón":
+                        Debug.Log("Estás hablando con el portón");
+                        TalkManager.Instance.WakeUpPortonMenu();
+                        //InitializePorton();
+                        break;
+                    case "estatua":
+                        Debug.Log("Estás hablando con la estatua");
+                        TalkManager.Instance.WakeUpEstatuaMenu();
+                        break;
+                    default:
+                        Debug.Log("La entidad no existe");
+                        break;
+                }
 
+            //}
+            //else
+            //{
+            //    string sendMsg = "Estás muy lejos del objeto. Muévete cerca del objeto antes";
+            //    buildOtherMsg(sendMsg);
+            //    Debug.Log("Acercate al objeto antes");
+            //}
         }
         else
         {
-            string sendMsg = "Estás muy lejos del objeto. Muévete cerca del objeto antes";
-            buildOtherMsg(sendMsg);
-            Debug.Log("Acercate al objeto antes");
+            Debug.Log("El objeto ha sido destruido");
         }
+        
     }
 
     private void Saltar(GameObject obj)
     {
-        Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
-        Jump(rb);
+        if (obj != null)
+        {
+            Rigidbody2D rb = obj.GetComponent<Rigidbody2D>();
+            Jump(rb);
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     // Métodos con lógica para acciones específicas que aceptan un GameObject como argumento
     private void Utilizar(GameObject obj)
     {
-        utilizarController.Utilizar(obj);
+        if (obj != null)
+        {
+            utilizarController.Utilizar(obj);
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
     }
 
     private void Materializar(GameObject obj)
     {
-        // Instancio el prefab al lado de Naeve
-        Vector3 spawnPos = player.transform.position + 5 * (Vector3.right + Vector3.up);
-        Instantiate(obj, spawnPos, Quaternion.identity);
+        if (obj != null)
+        {
+            // Instancio el prefab al lado de Naeve
+            Vector3 spawnPos = player.transform.position + 5 * (Vector3.right + Vector3.up);
+            Instantiate(obj, spawnPos, Quaternion.identity);
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     private void Levitar(GameObject obj)
     {
-        Debug.Log("Lógica para hacer levitar el objeto: " + obj.name);
-        // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
-        Rigidbody2D body = obj.GetComponent<Rigidbody2D>();
-        if (body != null)
+        if (obj != null)
         {
-            body.bodyType = RigidbodyType2D.Static;
+            Debug.Log("Lógica para hacer levitar el objeto: " + obj.name);
+            // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
+            Rigidbody2D body = obj.GetComponent<Rigidbody2D>();
+            if (body != null)
+            {
+                body.bodyType = RigidbodyType2D.Static;
+            }
+            target = obj.transform.position; // El target pasa a ser un punto por encima del objeto
+            target.y = obj.transform.position.y + 10f;
+            moving = true;
+            objectMoving = obj;
+            MoveTowardsTarget(obj);
         }
-        target = obj.transform.position; // El target pasa a ser un punto por encima del objeto
-        target.y = obj.transform.position.y + 10f;
-        moving = true;
-        objectMoving = obj;
-        MoveTowardsTarget(obj);
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
 
     // Suelta el objeto en el mismo lugar en el que se cogió, ya que sólo lo desactivamos y lo activamos.
     private void Soltar(GameObject obj)
     {
-        if (inventory.Contains(obj.tag))
+        if (obj != null)
         {
-            inventory.Remove(obj.tag);
-            // Al hacer esto, deja el objeto en el mismo sitio en el que estaba
-            obj.SetActive(true);
-            //Instantiate(obj, transform.position, transform.rotation);
+            if (inventory.Contains(obj.tag))
+            {
+                inventory.Remove(obj.tag);
+                // Al hacer esto, deja el objeto en el mismo sitio en el que estaba
+                obj.SetActive(true);
+                //Instantiate(obj, transform.position, transform.rotation);
+            }
+            else
+            {
+                Debug.Log("El objeto que quieres soltar no está en el inventario");
+            }
         }
         else
         {
-            Debug.Log("El objeto que quieres soltar no está en el inventario");
+            Debug.Log("El objeto ha sido destruido");
         }
+        
 
     }
 
     // Teletransporta a Naeve al objeto obj
     private void Teletransportar(GameObject obj)
     {
-        Debug.Log("Lógica para teletransportar el objeto: " + obj.name);
-        // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
-        // Si la altura es menor que el suelo, teletransportamos al suelo.
-        //posY = (posY < 2.2525f) ? 2.2525f : posY;
-        if (posY < 2.2525f) posY = 2.2525f;
-        target = new Vector2(posX, posY); // Creamos el vector 2D con las posiciones del objeto
-        // Añado Vextor3.up * 5.0f para que el efecto sea en el cuerpo de Naeve y no en los pies
-        Instantiate(teleportVFX, obj.transform.position + Vector3.up * 4.0f, Quaternion.identity);
-        TeleportTowardsTarget(obj);
-        Instantiate(teleportVFX, target, Quaternion.identity);
+        if (obj != null)
+        {
+            Debug.Log("Lógica para teletransportar el objeto: " + obj.name);
+            // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
+            // Si la altura es menor que el suelo, teletransportamos al suelo.
+            //posY = (posY < 2.2525f) ? 2.2525f : posY;
+            if (posY < 2.2525f) posY = 2.2525f;
+            target = new Vector2(posX, posY); // Creamos el vector 2D con las posiciones del objeto
+                                              // Añado Vextor3.up * 5.0f para que el efecto sea en el cuerpo de Naeve y no en los pies
+            Instantiate(teleportVFX, obj.transform.position + Vector3.up * 4.0f, Quaternion.identity);
+            TeleportTowardsTarget(obj);
+            Instantiate(teleportVFX, target, Quaternion.identity);
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     private void Atraer(GameObject obj)
     {
-        Debug.Log("Lógica para atraer el objeto: " + obj.name);
-        // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
-        target = (Vector2)player.transform.position; // El target en este caso sería la propia Naeve
-        moving = true;
-        objectMoving = obj;
-        MoveTowardsTarget(obj);
+        if (obj != null)
+        {
+            Debug.Log("Lógica para atraer el objeto: " + obj.name);
+            // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
+            target = (Vector2)player.transform.position; // El target en este caso sería la propia Naeve
+            moving = true;
+            objectMoving = obj;
+            MoveTowardsTarget(obj);
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     private void Esconderse(GameObject obj)
     {
-        // Movemos a Naeve a ese objeto. Subo la velocidad para que vaya corriendo, ya que se trata de una urgencia.
-        target = (Vector2)obj.transform.position;
-        moving = true;
-        objectMoving = player;
-        SetSpeed(15f);
-        hidde = true;
-
-        if (IsGrounded())
+        if (obj != null)
         {
-            MoveNaeve();
-            MoveTowardsTarget(player);
-        }
-    }
-
-    private void Atacar(GameObject obj)
-    {
-        if (inventory.Contains("cuchillo"))
-        {
-            GameObject naeve = GameObject.Find("Naeve");
-
-            if (naeve != null)
-            {
-                // Si se encuentra "Naeve", buscar dentro de él el objeto "Skeletal"
-                UnityEngine.Transform skeletalTransform = naeve.transform.Find("Skeletal");
-
-                if (skeletalTransform != null)
-                {
-                    // Si se encuentra "Skeletal", buscar dentro de él el objeto "Cuchillo"
-                    GameObject cuchillo = skeletalTransform.Find("Cuchillo").gameObject;
-
-                    if (cuchillo != null)
-                    {
-                        // Si se encuentra "Cuchillo", activarlo
-                        cuchillo.SetActive(true);
-                    }
-                    else
-                    {
-                        Debug.LogError("El objeto 'Cuchillo' no se ha encontrado dentro de 'Skeletal'.");
-                    }
-                }
-                else
-                {
-                    Debug.LogError("El objeto 'Skeletal' no se ha encontrado dentro de 'Naeve'.");
-                }
-            }
-            else
-            {
-                Debug.LogError("El objeto 'Naeve' no se ha encontrado en la escena.");
-            }
-
+            if (obj == enemy) obj = sofa; // Una pequeña trampita por si decide responder que se quiere esconder del enemigo con /esconder/enemigo queriendo esconderse de este no en este. Pongo el sofá como escondite "default"
+            // Movemos a Naeve a ese objeto. Subo la velocidad para que vaya corriendo, ya que se trata de una urgencia.
             target = (Vector2)obj.transform.position;
             moving = true;
             objectMoving = player;
+            SetSpeed(15f);
+            hidde = true;
 
             if (IsGrounded())
             {
-                attacking = true;
-                objAttacked = obj;
                 MoveNaeve();
                 MoveTowardsTarget(player);
             }
         }
         else
         {
-            Debug.Log("No tienes ningún objeto para atacar");
+            Debug.Log("El objeto ha sido destruido");
         }
+        
+    }
+
+    private void Atacar(GameObject obj)
+    {
+        if (obj != null)
+        {
+            if (inventory.Contains("cuchillo"))
+            {
+                GameObject naeve = GameObject.Find("Naeve");
+
+                if (naeve != null)
+                {
+                    // Si se encuentra "Naeve", buscar dentro de él el objeto "Skeletal"
+                    UnityEngine.Transform skeletalTransform = naeve.transform.Find("Skeletal");
+
+                    if (skeletalTransform != null)
+                    {
+                        // Si se encuentra "Skeletal", buscar dentro de él el objeto "Cuchillo"
+                        GameObject cuchillo = skeletalTransform.Find("Cuchillo").gameObject;
+
+                        if (cuchillo != null)
+                        {
+                            // Si se encuentra "Cuchillo", activarlo
+                            cuchillo.SetActive(true);
+                        }
+                        else
+                        {
+                            Debug.LogError("El objeto 'Cuchillo' no se ha encontrado dentro de 'Skeletal'.");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("El objeto 'Skeletal' no se ha encontrado dentro de 'Naeve'.");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("El objeto 'Naeve' no se ha encontrado en la escena.");
+                }
+
+                target = (Vector2)obj.transform.position;
+                moving = true;
+                objectMoving = player;
+
+                if (IsGrounded())
+                {
+                    attacking = true;
+                    objAttacked = obj;
+                    MoveNaeve();
+                    MoveTowardsTarget(player);
+                }
+            }
+            else
+            {
+                Debug.Log("No tienes ningún objeto para atacar");
+            }
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+       
     }
 
     private void Explotar(GameObject obj)
     {
-        Debug.Log("Explotando...");
-        // Instanciamos el efecto de la explosión y aumentamos su tamaño
-        GameObject explosionInstance = Instantiate(explosionVFX, obj.transform.position, Quaternion.identity);
-        Vector3 nuevaEscala = new Vector3(10f, 10f, 10f); 
-        explosionInstance.transform.localScale = nuevaEscala;
-        Desaparecer(obj);
+        if (obj != null)
+        {
+            Debug.Log("Explotando...");
+            // Instanciamos el efecto de la explosión y aumentamos su tamaño
+            GameObject explosionInstance = Instantiate(explosionVFX, obj.transform.position, Quaternion.identity);
+            Vector3 nuevaEscala = new Vector3(10f, 10f, 10f);
+            explosionInstance.transform.localScale = nuevaEscala;
+            Desaparecer(obj);
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     // Quizá en la función crecer, pedir a chat gpt cuanto tiene que crecer.
     private void Crecer(GameObject obj)
     {
-        float newX = obj.transform.localScale.x * 2;
-        float newY = obj.transform.localScale.y * 2;
-        StartCoroutine(CambiarTamañoConTransicion(obj, newX, newY));
+        if (obj != null)
+        {
+            float newX = obj.transform.localScale.x * 2;
+            float newY = obj.transform.localScale.y * 2;
+            StartCoroutine(CambiarTamañoConTransicion(obj, newX, newY));
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     private void Menguar(GameObject obj)
     {
-        float newX = obj.transform.localScale.x / 2;
-        float newY = obj.transform.localScale.y / 2;
-        StartCoroutine(CambiarTamañoConTransicion(obj, newX, newY));
+        if (obj != null)
+        {
+            float newX = obj.transform.localScale.x / 2;
+            float newY = obj.transform.localScale.y / 2;
+            StartCoroutine(CambiarTamañoConTransicion(obj, newX, newY));
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+       
     }
 
     private void Desaparecer(GameObject obj)
     {
-        obj.SetActive(false);
+        if (obj != null)
+        {
+            obj.SetActive(false);
+        }
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     private void Vibrar(GameObject obj)
@@ -797,43 +990,65 @@ public class TraductionLogic : MonoBehaviour
 
     void Mover(GameObject obj)
     {
-        Debug.Log("Lógica para mover el objeto: " + obj.name);
-        // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
-        target = new Vector2(posX, posY); // Creamos el vector 2D con las posiciones del objeto
-        posX = 0; posY = 0; // * Reseteo posiciones para depuración
-        moving = true;
-        objectMoving = obj;
-        if (obj == player && IsGrounded()) // Si el objeto dado es el jugador sólo se puede mover en el eje x, además activamos la animación de correr
+        if (obj != null)
         {
-            MoveNaeve();
+            Debug.Log("Lógica para mover el objeto: " + obj.name);
+            // Hacemos que el objeto dado se mueva a la posición posx, posy, dada por chatGPT y guardada en la función anterior
+            target = new Vector2(posX, posY); // Creamos el vector 2D con las posiciones del objeto
+            posX = 0; posY = 0; // * Reseteo posiciones para depuración
+            moving = true;
+            objectMoving = obj;
+            if (obj == player && IsGrounded()) // Si el objeto dado es el jugador sólo se puede mover en el eje x, además activamos la animación de correr
+            {
+                MoveNaeve();
+            }
+            if (IsGrounded()) MoveTowardsTarget(obj);
         }
-        if (IsGrounded()) MoveTowardsTarget(obj);
+        else
+        {
+            Debug.Log("El objeto ha sido destruido");
+        }
+        
     }
 
     private void Coger(GameObject obj)
     {
-        Debug.Log("Lógica para coger el objeto: " + obj.name);
-        if (isOnRange(obj))
+        if (obj != null)
         {
-            inventory.Add(obj.tag); // Añadimos el objeto al inventario
-            obj.SetActive(false);
-            //Destroy(obj);
-            Debug.Log("Añadido: " + inventory[inventory.Count - 1] + " al inventario.");
-            
-            // Enviamos a GPT la información con el inventario actualizado.
-            string msg = obj.tag + " añadido al inventario. Objetos en el inventario: ";
-            foreach (string item in inventory)
+            Debug.Log("Lógica para coger el objeto: " + obj.name);
+            if (isOnRange(obj))
             {
-                msg += item;
+                inventory.Add(obj.tag); // Añadimos el objeto al inventario
+
+                // Obtenemos el script para añadir el objeto al inventario y llamamos a la función que lo hace
+                ItemPickUp pickUp = obj.GetComponent<ItemPickUp>();
+                if (pickUp != null)
+                {
+                    pickUp.Pickup();
+                }
+                //Destroy(obj);
+                Debug.Log("Añadido: " + inventory[inventory.Count - 1] + " al inventario.");
+
+                // Enviamos a GPT la información con el inventario actualizado.
+                string msg = obj.tag + " añadido al inventario. Objetos en el inventario: ";
+                foreach (string item in inventory)
+                {
+                    msg += item;
+                }
+                buildOtherMsg(msg);
             }
-            buildOtherMsg(msg);
+            else
+            {
+                string sendMsg = "Estás muy lejos del objeto. Muévete cerca del objeto antes";
+                buildOtherMsg(sendMsg);
+                Debug.Log("Acercate al objeto antes");
+            }
         }
         else
         {
-            string sendMsg = "Estás muy lejos del objeto. Muévete cerca del objeto antes";
-            buildOtherMsg(sendMsg);
-            Debug.Log("Acercate al objeto antes");
+            Debug.Log("El objeto ha sido destruido");
         }
+        
     }
 
     // Utilizo una corutina para ir menguando y creciendo poco a poco el objeto
@@ -864,6 +1079,20 @@ public class TraductionLogic : MonoBehaviour
         float distance = Vector2.Distance(player.transform.position, obj.transform.position);
         if (distance <= interactionRange) return true;
         return false;
+    }
+
+    public void GetPortonKey(string message)
+    {
+        string pattern = @"\[Abierta\]";
+        // Busco la primera coincidencia de la cadena "[Abierta]" en el mensaje del portón 
+        Match match = Regex.Match(message, pattern);
+        portalVFX.SetActive(true);
+
+        if (match.Success)
+        {
+            Debug.Log("Abierta!");
+            // Funcionalidad de abrir la puerta y acabar el juego. Final 1.
+        }
     }
 
     public void GetAction(string message)
@@ -1041,6 +1270,7 @@ public class TraductionLogic : MonoBehaviour
                 }
                 else
                 {
+                    // Si no es uno de los objetos predeterminados de la escena, puede haber sido creado por materializa, por lo que tendría que probar y ejecutarlo en ese caso
                     Debug.Log("Error: No se ha encontrado el objeto");
                 }
             }
@@ -1054,6 +1284,7 @@ public class TraductionLogic : MonoBehaviour
                     Debug.Log("Acción: " + action);
                     Debug.Log("Posición X: " + posX);
                     Debug.Log("Posición Y: " + posY);
+                    if (action == "avanzar") action = "mover";
                     // Confirmamos que la accion sea mover
                     if (action == actions[1])
                     {
@@ -1178,6 +1409,11 @@ public class TraductionLogic : MonoBehaviour
         // Abrimos el menú de muerte, desde el que se puede voler a empezar o salir con un poco de delay para poder ver la animación de muerte.
     }
 
+    private void EndGame()
+    {
+        // Aquí iría el final del juego.
+    }
+
     private void ActivatePause()
     {
         if (canvasObj != null)
@@ -1185,7 +1421,7 @@ public class TraductionLogic : MonoBehaviour
             PauseMenu pauseMenu = canvasObj.GetComponent<PauseMenu>();
             if (pauseMenu != null)
             {
-                pauseMenu.DeathPause();
+                pauseMenu.Pause(deathMenuUI);
             }
         }
     }
@@ -1195,6 +1431,18 @@ public class TraductionLogic : MonoBehaviour
     {
         string answer = naeveControllerGPT.GetInputField();
         await SendAndHandleReply(answer);
+    }
+
+    public async void ButtonPulsedAsyncPorton()
+    {
+        string answer = portonControllerGPT.GetInputField();
+        await SendAndHandleReplyNPC(portonControllerGPT, answer);
+    }
+
+    public async void ButtonPulsedAsyncEstatua()
+    {
+        string answer = estatuaControllerGPT.GetInputField();
+        await SendAndHandleReplyNPC(estatuaControllerGPT, answer);
     }
 
     private void FormatNaeveText()

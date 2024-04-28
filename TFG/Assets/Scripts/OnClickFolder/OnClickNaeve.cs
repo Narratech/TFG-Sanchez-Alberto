@@ -8,7 +8,7 @@ public class OnClickNaeve : MonoBehaviour
 {
     public GameObject enemy;
     private bool enemyActivated = false;
-    private float activationAxis = 55f; // La coordenada en la que aparecerá el enemigo
+    private float activationAxis = 80f; // La coordenada en la que aparecerá el enemigo
 
     private void Update()
     {
