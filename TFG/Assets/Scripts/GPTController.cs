@@ -19,8 +19,6 @@ namespace OpenAI
         [SerializeField] public TMP_InputField inputField;
         [SerializeField] public Button button;
         public GameObject dialogueBox;
-        public GameObject portonChat;
-        public GameObject estatuaChat;
 
         //private static GPTController _instance;
 
@@ -54,39 +52,19 @@ namespace OpenAI
             // Ignoro el primer mensaje
             if (messages.Count > 2)
             {
-                if (this.name == "Naeve GPT")
+                if (this.name != "Action GPT")
                 {
+                    // Activamos el cuadro de texto y obtenemos su dialogueController
                     dialogueBox.SetActive(true);
                     DialogueController dialogueController = dialogueBox.GetComponent<DialogueController>();
-                    if (dialogueController != null)
-                    {
-                        Debug.Log("Hablamos con Naeve");
-                        dialogueController.DeleteLastMsg();
-                        dialogueController.StartDialogue(message);
-                    }
-                }
-                else if (this.name == "NPC Chat")
-                {
-                    portonChat.SetActive(true);
-                    DialogueController dialogueController = portonChat.GetComponent<DialogueController>();
-                    if (dialogueController != null)
-                    {
-                        dialogueController.DeleteLastMsg();
-                        dialogueController.StartDialogue(message);
-                    }
 
-                }
-                else if (this.name == "Estatua Chat")
-                {
-                    estatuaChat.SetActive(true);
-                    DialogueController dialogueController = estatuaChat.GetComponent<DialogueController>();
                     if (dialogueController != null)
                     {
                         dialogueController.DeleteLastMsg();
                         dialogueController.StartDialogue(message);
                     }
                 }
-
+                // El action GPT no tiene cuadro de diálogo, por lo que solo ponemos el texto en un cuadro para depurar.
                 else
                 {
                     textito.SetText(message);

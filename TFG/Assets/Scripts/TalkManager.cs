@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,9 @@ public class TalkManager : MonoBehaviour
     public static TalkManager Instance;
     public GameObject portonTalkMenu;
     public GameObject estatuaTalkMenu;
+    public GameObject quimeraTalkMenu;
+    public GameObject loboTalkMenu;
+
     public GameObject portonDialogueBox;
     public GameObject estatuaDialogueBox;
 
@@ -40,4 +44,27 @@ public class TalkManager : MonoBehaviour
         }
     }
 
+    internal void WakeUpQuimeraMenu()
+    {
+        if (quimeraTalkMenu != null)
+        {
+            PauseMenu pauseMenu = gameObject.GetComponent<PauseMenu>();
+            if (pauseMenu != null)
+            {
+                pauseMenu.Pause(quimeraTalkMenu);
+            }
+        }
+    }
+
+    internal void WakeUpLoboMenu()
+    {
+        if (loboTalkMenu != null)
+        {
+            PauseMenu pauseMenu = gameObject.GetComponent<PauseMenu>();
+            if (pauseMenu != null)
+            {
+                pauseMenu.Pause(loboTalkMenu);
+            }
+        }
+    }
 }

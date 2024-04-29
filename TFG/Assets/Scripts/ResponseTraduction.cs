@@ -34,6 +34,9 @@ public class TraductionLogic : MonoBehaviour
     //public GPTController resumenControllerGPT;
     public GPTController portonControllerGPT;
     public GPTController estatuaControllerGPT;
+    public GPTController quimeraControllerGPT;
+    public GPTController loboControllerGPT;
+
 
     public GameObject canvasObj;
 
@@ -51,6 +54,9 @@ public class TraductionLogic : MonoBehaviour
     public GameObject cofre;
     public GameObject estatua;
     public GameObject arbol;
+    public GameObject quimera;
+    public GameObject lobo;
+
 
     public GameObject teleportVFX;
     public GameObject explosionVFX;
@@ -100,10 +106,10 @@ public class TraductionLogic : MonoBehaviour
     private bool paraguasActivated = false;
 
     // Abecedario del lenguaje formal, dividido en acciones, objetos y entidades
-    private string[] actions = { "coger", "mover", "transformar", "vibrar", "desaparecer", "menguar", "crecer", "explotar", "atacar", "esconderse", "atraer", "teletransportar", "soltar", "levitar", "materializar", "utilizar", "saltar", "hablar", "esperar", "caer", "invisibilizar", "controlar"};
-    private string[] objects = { "paraguas", "cómic", "tronco", "sofá", "mesa", "vela", "silla", "cofre", "árbol"};
-    private string[] entities = { "Naeve", "enemigo", "portón", "estatua" };
-    private string[] objectsNoScene = { "llave", "puerta", "linterna"};
+    private string[] actions = { "coger", "mover", "transformar", "vibrar", "desaparecer", "menguar", "crecer", "explotar", "atacar", "esconderse", "atraer", "teletransportar", "soltar", "levitar", "materializar", "utilizar", "saltar", "hablar", "esperar", "caer", "invisibilizar", "controlar" };
+    private string[] objects = { "paraguas", "cómic", "tronco", "sofá", "mesa", "vela", "silla", "cofre", "árbol" };
+    private string[] entities = { "Naeve", "enemigo", "portón", "estatua", "quimera", "lobo" };
+    private string[] objectsNoScene = { "llave", "puerta", "linterna" };
     //private GameObject[] gameObjectList = { player, comic, paraguas };
     private List<string> inventory = new();
     // Diccionario con la correspondencia string-gameobject para cada objeto y ente
@@ -123,6 +129,8 @@ public class TraductionLogic : MonoBehaviour
 
         InitializePorton();
         InitializeEstatua();
+        InitializeQuimera();
+        InitializeLobo();
         //GenerateErrorGPT();
         // Añado esto porque he tenido problemas para que la partida no esté pausada al resetearse
         PauseMenu.gameIsPaused = false;
@@ -294,28 +302,30 @@ public class TraductionLogic : MonoBehaviour
         await SendAndHandleReplyNPC(estatuaControllerGPT, "");
     }
 
+    private async Task GenerateQuimeraGPT()
+    {
+        string quimeraMsg = promptManager.getQuimeraPrompt();
+        quimeraControllerGPT.SetPrompt(quimeraMsg);
+        Debug.Log("Prompt seteado, continuamos: " + quimeraMsg);
+        await SendAndHandleReplyNPC(quimeraControllerGPT, "");
+    }
+
+    private async Task GenerateLoboGPT()
+    {
+        string loboMsg = promptManager.getLoboPrompt();
+        loboControllerGPT.SetPrompt(loboMsg);
+        Debug.Log("Prompt seteado, continuamos: " + loboMsg);
+        await SendAndHandleReplyNPC(loboControllerGPT, "");
+    }
+
     private async void InitializePorton()
     {
-        //GameObject portonObj = GameObject.Find("NPC Chat");
-        //if (portonObj != null)
-        //{
-        //    portonControllerGPT = portonObj.GetComponent<GPTController>();
+        if (portonControllerGPT != null)
+        {
+            //Debug.Log("Todo encontrado, continuamos");
 
-            if (portonControllerGPT != null)
-            {
-                //Debug.Log("Todo encontrado, continuamos");
-
-                await GeneratePortonGPT();
-            }
-        //    else
-        //    {
-        //        Debug.LogWarning("componente controller no encontrado");
-        //    }
-        //}
-        //else
-        //{
-        //    Debug.LogWarning("NPC Chat no encontrado");
-        //}
+            await GeneratePortonGPT();
+        }
     }
 
     private async void InitializeEstatua()
@@ -325,6 +335,23 @@ public class TraductionLogic : MonoBehaviour
             await GenerateEstatuaGPT();
         }
     }
+
+    private async void InitializeQuimera()
+    {
+        if (quimeraControllerGPT != null)
+        {
+            await GenerateQuimeraGPT();
+        }
+    }
+
+    private async void InitializeLobo()
+    {
+        if (loboControllerGPT != null)
+        {
+            await GenerateLoboGPT();
+        }
+    }
+
 
     // Construye el prompt cuando aparece el hombre del sombrero
     private async void buildEnemyPrompt()
@@ -497,6 +524,7 @@ public class TraductionLogic : MonoBehaviour
         Debug.Log("Mensaje appendeado: " + chatReply);
         chatController.AppendMessage(chatReply);
         chatController.UpdateGPT();
+        // Hacer un switch para facilitar añadir nuevos NPCs
         // Si el NPC es el portón buscamos la cadena "[Abierta]"
         if (chatController == portonControllerGPT)
         {
@@ -522,6 +550,9 @@ public class TraductionLogic : MonoBehaviour
         objectDictionary.Add("Naeve", player);
         objectDictionary.Add("estatua", estatua);
         objectDictionary.Add("árbol", arbol);
+        objectDictionary.Add("quimera", quimera);
+        objectDictionary.Add("lobo", lobo);
+
     }
 
     private void InitializeActionObjectLogic()
@@ -594,7 +625,7 @@ public class TraductionLogic : MonoBehaviour
             {
                 PlayerMovement.playerControl = false;
             }
-            
+
         }
     }
 
@@ -625,7 +656,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Esperar(GameObject obj)
@@ -640,27 +671,35 @@ public class TraductionLogic : MonoBehaviour
             Debug.Log("Lógica para hablar con el ente: " + obj.name);
             //if (isOnRange(obj))
             //{
-                switch (obj.tag)
-                {
-                    case "Naeve":
-                        Debug.Log("Estás hablando contigo misma");
-                        break;
-                    case "enemigo":
-                        Debug.Log("Estás hablando con el hombre del sombrero");
-                        break;
-                    case "portón":
-                        Debug.Log("Estás hablando con el portón");
-                        TalkManager.Instance.WakeUpPortonMenu();
-                        //InitializePorton();
-                        break;
-                    case "estatua":
-                        Debug.Log("Estás hablando con la estatua");
-                        TalkManager.Instance.WakeUpEstatuaMenu();
-                        break;
-                    default:
-                        Debug.Log("La entidad no existe");
-                        break;
-                }
+            switch (obj.tag)
+            {
+                case "Naeve":
+                    Debug.Log("Estás hablando contigo misma");
+                    break;
+                case "enemigo":
+                    Debug.Log("Estás hablando con el hombre del sombrero");
+                    break;
+                case "portón":
+                    Debug.Log("Estás hablando con el portón");
+                    TalkManager.Instance.WakeUpPortonMenu();
+                    //InitializePorton();
+                    break;
+                case "estatua":
+                    Debug.Log("Estás hablando con la estatua");
+                    TalkManager.Instance.WakeUpEstatuaMenu();
+                    break;
+                case "quimera":
+                    Debug.Log("Estás hablando con la estatua");
+                    TalkManager.Instance.WakeUpQuimeraMenu();
+                    break;
+                case "lobo":
+                    Debug.Log("Estás hablando con la estatua");
+                    TalkManager.Instance.WakeUpLoboMenu();
+                    break;
+                default:
+                    Debug.Log("La entidad no existe");
+                    break;
+            }
 
             //}
             //else
@@ -674,7 +713,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Saltar(GameObject obj)
@@ -688,7 +727,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     // Métodos con lógica para acciones específicas que aceptan un GameObject como argumento
@@ -716,7 +755,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Levitar(GameObject obj)
@@ -740,7 +779,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
 
@@ -765,7 +804,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
 
     }
 
@@ -789,7 +828,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Atraer(GameObject obj)
@@ -807,7 +846,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Esconderse(GameObject obj)
@@ -832,7 +871,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Atacar(GameObject obj)
@@ -894,7 +933,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-       
+
     }
 
     private void Explotar(GameObject obj)
@@ -912,7 +951,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     // Quizá en la función crecer, pedir a chat gpt cuanto tiene que crecer.
@@ -928,7 +967,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Menguar(GameObject obj)
@@ -943,7 +982,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-       
+
     }
 
     private void Desaparecer(GameObject obj)
@@ -956,7 +995,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Vibrar(GameObject obj)
@@ -1008,7 +1047,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     private void Coger(GameObject obj)
@@ -1048,7 +1087,7 @@ public class TraductionLogic : MonoBehaviour
         {
             Debug.Log("El objeto ha sido destruido");
         }
-        
+
     }
 
     // Utilizo una corutina para ir menguando y creciendo poco a poco el objeto
@@ -1377,7 +1416,7 @@ public class TraductionLogic : MonoBehaviour
         string prefabName = char.ToUpper(objeto[0]) + objeto.Substring(1).ToLower();
         // Intento cargar el prefab desde la carpeta
         Debug.Log("El nombre del prefab a buscar será: " + prefabName);
-        GameObject prefab = Resources.Load<GameObject>("Prefabs/" + prefabName);   
+        GameObject prefab = Resources.Load<GameObject>("Prefabs/" + prefabName);
         if (prefab != null)
         {
             Debug.Log("El prefab encontrado es:" + prefab.name);
@@ -1443,6 +1482,18 @@ public class TraductionLogic : MonoBehaviour
     {
         string answer = estatuaControllerGPT.GetInputField();
         await SendAndHandleReplyNPC(estatuaControllerGPT, answer);
+    }
+
+    public async void ButtonPulsedAsyncQuimera()
+    {
+        string answer = quimeraControllerGPT.GetInputField();
+        await SendAndHandleReplyNPC(quimeraControllerGPT, answer);
+    }
+
+    public async void ButtonPulsedAsyncLobo()
+    {
+        string answer = loboControllerGPT.GetInputField();
+        await SendAndHandleReplyNPC(loboControllerGPT, answer);
     }
 
     private void FormatNaeveText()

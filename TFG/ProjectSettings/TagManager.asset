@@ -49,6 +49,8 @@ TagManager:
   - "port\xF3n"
   - talk
   - portal
+  - lobo
+  - quimera
   layers:
   - Default
   - TransparentFX
