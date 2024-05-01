@@ -11,6 +11,7 @@ public class TalkManager : MonoBehaviour
     public GameObject estatuaTalkMenu;
     public GameObject quimeraTalkMenu;
     public GameObject loboTalkMenu;
+    public GameObject guardaTalkMenu;
 
     public GameObject portonDialogueBox;
     public GameObject estatuaDialogueBox;
@@ -64,6 +65,18 @@ public class TalkManager : MonoBehaviour
             if (pauseMenu != null)
             {
                 pauseMenu.Pause(loboTalkMenu);
+            }
+        }
+    }
+
+    internal void WakeUpGuardaMenu()
+    {
+        if (guardaTalkMenu != null)
+        {
+            PauseMenu pauseMenu = gameObject.GetComponent<PauseMenu>();
+            if (pauseMenu != null)
+            {
+                pauseMenu.Pause(guardaTalkMenu);
             }
         }
     }

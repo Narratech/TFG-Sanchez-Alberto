@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Collections;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,7 +37,7 @@ public class TraductionLogic : MonoBehaviour
     public GPTController estatuaControllerGPT;
     public GPTController quimeraControllerGPT;
     public GPTController loboControllerGPT;
-
+    public GPTController guardaControllerGPT;
 
     public GameObject canvasObj;
 
@@ -56,7 +57,7 @@ public class TraductionLogic : MonoBehaviour
     public GameObject arbol;
     public GameObject quimera;
     public GameObject lobo;
-
+    public GameObject guarda;
 
     public GameObject teleportVFX;
     public GameObject explosionVFX;
@@ -88,6 +89,7 @@ public class TraductionLogic : MonoBehaviour
     private float fadeSpeed = 1.0f;
     private float invisibleValue = 0.021f;
 
+    private bool cofreActivado = false;
     private bool attacking = false;
     private GameObject objAttacked = null;
 
@@ -108,7 +110,7 @@ public class TraductionLogic : MonoBehaviour
     // Abecedario del lenguaje formal, dividido en acciones, objetos y entidades
     private string[] actions = { "coger", "mover", "transformar", "vibrar", "desaparecer", "menguar", "crecer", "explotar", "atacar", "esconderse", "atraer", "teletransportar", "soltar", "levitar", "materializar", "utilizar", "saltar", "hablar", "esperar", "caer", "invisibilizar", "controlar" };
     private string[] objects = { "paraguas", "cómic", "tronco", "sofá", "mesa", "vela", "silla", "cofre", "árbol" };
-    private string[] entities = { "Naeve", "enemigo", "portón", "estatua", "quimera", "lobo" };
+    private string[] entities = { "Naeve", "enemigo", "portón", "estatua", "quimera", "lobo", "guarda" };
     private string[] objectsNoScene = { "llave", "puerta", "linterna" };
     //private GameObject[] gameObjectList = { player, comic, paraguas };
     private List<string> inventory = new();
@@ -129,8 +131,10 @@ public class TraductionLogic : MonoBehaviour
 
         InitializePorton();
         InitializeEstatua();
-        InitializeQuimera();
-        InitializeLobo();
+        //InitializeQuimera();
+        //InitializeLobo();
+        //InitializeGuarda();
+
         //GenerateErrorGPT();
         // Añado esto porque he tenido problemas para que la partida no esté pausada al resetearse
         PauseMenu.gameIsPaused = false;
@@ -186,12 +190,11 @@ public class TraductionLogic : MonoBehaviour
             Debug.Log("JUEGO PAUSADO");
             return; // Ignora el resto del código en Update si el juego está pausado
         }
-
+       
         if (enemy.activeSelf && !enemyAwake) // Comprueba si el enemigo ha aparecido ya para generar el prompt correspondiente.
         {
             enemyAwake = true;
             buildEnemyPrompt(); // Llamamos a un función auxiliar para generar el mensaje y enviárselo a GPT.
-
         }
 
         if (PlayerMovement.playerControl)
@@ -318,6 +321,14 @@ public class TraductionLogic : MonoBehaviour
         await SendAndHandleReplyNPC(loboControllerGPT, "");
     }
 
+    private async Task GenerateGuardaGPT()
+    {
+        string guardaMsg = promptManager.getGuardaPrompt();
+        guardaControllerGPT.SetPrompt(guardaMsg);
+        Debug.Log("Prompt seteado, continuamos: " + guardaMsg);
+        await SendAndHandleReplyNPC(guardaControllerGPT, "");
+    }
+
     private async void InitializePorton()
     {
         if (portonControllerGPT != null)
@@ -349,6 +360,14 @@ public class TraductionLogic : MonoBehaviour
         if (loboControllerGPT != null)
         {
             await GenerateLoboGPT();
+        }
+    }
+
+    private async void InitializeGuarda()
+    {
+        if (guardaControllerGPT != null)
+        {
+            await GenerateGuardaGPT();
         }
     }
 
@@ -521,15 +540,29 @@ public class TraductionLogic : MonoBehaviour
         {
             await Task.Delay(10);
         }
-        Debug.Log("Mensaje appendeado: " + chatReply);
+        Debug.Log(chatController.tag + ": " + chatReply);
         chatController.AppendMessage(chatReply);
         chatController.UpdateGPT();
-        // Hacer un switch para facilitar añadir nuevos NPCs
         // Si el NPC es el portón buscamos la cadena "[Abierta]"
         if (chatController == portonControllerGPT)
         {
-            Debug.Log("Estamos donde hay que estar");
             GetPortonKey(chatReply);
+        }
+        else if (chatController == estatuaControllerGPT)
+        {
+            GetEstatuaKey(chatReply);
+        }
+        else if (chatController == quimeraControllerGPT)
+        {
+            GetQuimeraKey(chatReply);
+        }
+        else if (chatController == loboControllerGPT)
+        {
+            GetLoboKey(chatReply);
+        }
+        else if (chatController == guardaControllerGPT)
+        {
+            GetGuardaKey(chatReply);
         }
         chatReply = "";
     }
@@ -552,7 +585,7 @@ public class TraductionLogic : MonoBehaviour
         objectDictionary.Add("árbol", arbol);
         objectDictionary.Add("quimera", quimera);
         objectDictionary.Add("lobo", lobo);
-
+        objectDictionary.Add("guarda", guarda);
     }
 
     private void InitializeActionObjectLogic()
@@ -668,7 +701,7 @@ public class TraductionLogic : MonoBehaviour
     {
         if (obj != null)
         {
-            Debug.Log("Lógica para hablar con el ente: " + obj.name);
+            Debug.Log("Lógica para hablar con el ente: " + obj.tag);
             //if (isOnRange(obj))
             //{
             switch (obj.tag)
@@ -689,12 +722,16 @@ public class TraductionLogic : MonoBehaviour
                     TalkManager.Instance.WakeUpEstatuaMenu();
                     break;
                 case "quimera":
-                    Debug.Log("Estás hablando con la estatua");
+                    Debug.Log("Estás hablando con la quimera");
                     TalkManager.Instance.WakeUpQuimeraMenu();
                     break;
                 case "lobo":
-                    Debug.Log("Estás hablando con la estatua");
+                    Debug.Log("Estás hablando con el lobo");
                     TalkManager.Instance.WakeUpLoboMenu();
+                    break;
+                case "guarda":
+                    Debug.Log("Estás hablando con el guarda");
+                    TalkManager.Instance.WakeUpGuardaMenu();
                     break;
                 default:
                     Debug.Log("La entidad no existe");
@@ -747,8 +784,17 @@ public class TraductionLogic : MonoBehaviour
     {
         if (obj != null)
         {
-            // Instancio el prefab al lado de Naeve
-            Vector3 spawnPos = player.transform.position + 5 * (Vector3.right + Vector3.up);
+            Vector3 spawnPos;
+            if (cofreActivado)
+            {
+                spawnPos = cofre.transform.position + 4 * (Vector3.up);
+                cofreActivado = false;
+            }
+            else
+            {
+                // Instancio el prefab al lado de Naeve
+                spawnPos = player.transform.position + 5 * (Vector3.right + Vector3.up);
+            }
             Instantiate(obj, spawnPos, Quaternion.identity);
         }
         else
@@ -1125,14 +1171,107 @@ public class TraductionLogic : MonoBehaviour
         string pattern = @"\[Abierta\]";
         // Busco la primera coincidencia de la cadena "[Abierta]" en el mensaje del portón 
         Match match = Regex.Match(message, pattern);
-        portalVFX.SetActive(true);
 
         if (match.Success)
         {
+            portalVFX.SetActive(true);
             Debug.Log("Abierta!");
             // Funcionalidad de abrir la puerta y acabar el juego. Final 1.
         }
     }
+
+    public void GetEstatuaKey(string message)
+    {
+        // Patrón para encontrar una cadena entre corchetes que representaría al objeto a crear
+        string pattern = @"\[[^\]]+\]";
+        Match match = Regex.Match(message, pattern);
+
+        if (match.Success)
+        {
+            Debug.Log("Objeto encontrado, comprobamos si existe");
+            string keyObject = match.Value.Trim('[', ']').ToLower(); // Obtengo la clave sin los corchetes
+            GameObject objectParsed = GetPrefabToSpawn(keyObject);
+            if (objectParsed != null)
+            {
+                cofreActivado = true;
+                ChestAnimator chestAnimator = cofre.GetComponent<ChestAnimator>();
+                if (chestAnimator != null) chestAnimator.OpenChest();
+                Materializar(objectParsed);
+            }
+            else
+            {
+                Debug.Log("Objeto no existente");
+            }
+            // Funcionalidad de materializar el objeto
+        }
+    }
+
+    public void GetQuimeraKey(string message)
+    {
+        string pattern = @"\[Adelante\]";
+        // Busco la primera coincidencia de la cadena "[Abierta]" en el mensaje del portón 
+        Match match = Regex.Match(message, pattern);
+        if (match.Success)
+        {
+            Debug.Log("Puedes continuar tu camino!");
+            Invoke("DesactivarQuimera", 10f); // Llama al método DesactivarQuimera después de 5 segundos
+        }
+    }
+
+    void DesactivarQuimera()
+    {
+        Instantiate(teleportVFX, quimera.transform.position + Vector3.up * 4.0f, Quaternion.identity);
+        quimera.SetActive(false); // Desactiva el GameObject quimera
+    }
+
+    public void GetLoboKey(string message)
+    {
+        string pattern = @"\[Seguir\]";
+        // Busco la primera coincidencia de la cadena "[Abierta]" en el mensaje del portón 
+        Match match = Regex.Match(message, pattern);
+        if (match.Success)
+        {
+            Debug.Log("El lobito te está siguiendo!");
+            // Funcionalidad para que el lobo siga al jugador
+            WolfController wolfController = lobo.GetComponent<WolfController>();
+            if (wolfController != null)
+            {
+                wolfController.SetFollow(true);
+            }
+        }
+    }
+
+    public void GetGuardaKey(string message)
+    {
+        string pattern1 = @"\[Alarma\]";
+        string pattern2 = @"\[Irse\]";
+
+        // Busco la primera coincidencia de la cadena "[Abierta]" en el mensaje del portón 
+        Match match1 = Regex.Match(message, pattern1);
+        Match match2 = Regex.Match(message, pattern2);
+
+        if (match1.Success)
+        {
+            Debug.Log("El guarda ha activado la alarma!");
+            // Funcionalidad para que el lobo siga al jugador
+            GuardaController guardaController = guarda.GetComponent<GuardaController>();
+            if (guardaController != null)
+            {
+                guardaController.Alarma();
+            }
+        }
+        else if (match2.Success)
+        {
+            Debug.Log("El guarda ha activado te ha dejado en paz!");
+            // Funcionalidad para que el lobo siga al jugador
+            GuardaController guardaController = guarda.GetComponent<GuardaController>();
+            if (guardaController != null)
+            {
+                guardaController.Irse();
+            }
+        }
+    }
+
 
     public void GetAction(string message)
     {
@@ -1494,6 +1633,12 @@ public class TraductionLogic : MonoBehaviour
     {
         string answer = loboControllerGPT.GetInputField();
         await SendAndHandleReplyNPC(loboControllerGPT, answer);
+    }
+
+    public async void ButtonPulsedAsyncGuarda()
+    {
+        string answer = guardaControllerGPT.GetInputField();
+        await SendAndHandleReplyNPC(guardaControllerGPT, answer);
     }
 
     private void FormatNaeveText()

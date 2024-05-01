@@ -51,6 +51,7 @@ TagManager:
   - portal
   - lobo
   - quimera
+  - guarda
   layers:
   - Default
   - TransparentFX

@@ -35,6 +35,7 @@ public class DialogueController : MonoBehaviour
     public void StartDialogue(string text)
     {
         index = 0;
+        lineList.Clear();
         if (text.Length > 150) 
         {
             lineList = SplitTextIntoLines(text, 150); // Dividir el texto en líneas de máximo 30 caracteres

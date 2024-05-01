@@ -21,6 +21,7 @@ namespace OpenAI
         public GameObject dialogueBox;
 
         //private static GPTController _instance;
+        private float temperature;
 
         private float height;
         private OpenAIApi openai = new();
@@ -29,6 +30,18 @@ namespace OpenAI
         private bool newMsgSend;
 
         private string prompt = "";
+
+        private void Start()
+        {
+            if (this.name == "Action GPT")
+            {
+                temperature = 0.5f;
+            }
+            else
+            {
+                temperature = 0.7f;
+            }
+        }
 
         //private void Start()
         //{
@@ -133,9 +146,9 @@ namespace OpenAI
             var completionResponse = await openai.CreateChatCompletion(new CreateChatCompletionRequest()
             {
                 Model = "gpt-3.5-turbo-0125",
-                Messages = messages
-                //Temperature = 0.7f
-            }); ;
+                Messages = messages,
+                Temperature = temperature
+            });
 
             if (completionResponse.Choices != null && completionResponse.Choices.Count > 0)
             {
