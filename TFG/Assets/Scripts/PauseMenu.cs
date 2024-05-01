@@ -52,7 +52,6 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
         gameIsPaused = false;
         AudioListener.pause = false;
-        dialogueBox.SetActive(true);
     }
 
     public void Pause(GameObject menu)

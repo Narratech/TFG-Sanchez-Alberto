@@ -8,7 +8,7 @@ public class DialogueController : MonoBehaviour
     public TextMeshProUGUI textComponent;
     private List<string> lineList = new List<string>(); // Lista de líneas
     private int index = 0;
-    public float textSpeed;
+    private float textSpeed = 0.02f;
     private bool isWriting = false; // Flag para verificar si se está escribiendo
 
     void Update()

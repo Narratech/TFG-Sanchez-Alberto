@@ -28,6 +28,7 @@ namespace OpenAI
         private List<ChatMessage> messages = new();
         private ChatMessage answer;
         private bool newMsgSend;
+        private bool firsMsg = true;
 
         private string prompt = "";
 
@@ -41,6 +42,11 @@ namespace OpenAI
             {
                 temperature = 0.7f;
             }
+        }
+
+        public bool GetFirstMsg()
+        {
+            return firsMsg;
         }
 
         //private void Start()
@@ -65,6 +71,7 @@ namespace OpenAI
             // Ignoro el primer mensaje
             if (messages.Count > 2)
             {
+                firsMsg = false;
                 if (this.name != "Action GPT")
                 {
                     // Activamos el cuadro de texto y obtenemos su dialogueController
@@ -112,13 +119,13 @@ namespace OpenAI
         {
 
             //Puedo guardar un contador en la clase y empezar el bucle desde ahí para no escribir todos los mensajes todo cada vez
-            //if (this.name == "Naeve GPT" || this.name == "Action GPT")
-            //{
-            //for (int i = 0; i < messages.Count; i++)
-            //{
-            //    Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
-            //}
-            //}
+            if (this.name == "Naeve GPT" || this.name == "Action GPT")
+            {
+            for (int i = 0; i < messages.Count; i++)
+            {
+                Debug.Log(this.name + ". Mensaje " + i + ": " + messages[i].Content);
+            }
+            }
         }
 
         // Obtiene la respuesta ya parseada, que corresponde con las acciones a realizar

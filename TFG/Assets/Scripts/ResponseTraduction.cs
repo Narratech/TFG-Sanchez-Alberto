@@ -83,10 +83,11 @@ public class TraductionLogic : MonoBehaviour
     private bool enemyAwake = false;
 
     private bool invisible = false;
+    private bool isInvisible = false;
     // Utilizo tanto hidde como hidden para poder "desesconder" a Naeve en cuanto se mueva. Si no utilizase ambos bool en cuanto Naeve se mueva al esconderse, se quitaría el cambio de capa
     private bool hidde = false;
     private bool hidden = false;
-    private float fadeSpeed = 1.0f;
+    private float fadeSpeed = 3.0f;
     private float invisibleValue = 0.021f;
 
     private bool cofreActivado = false;
@@ -254,7 +255,8 @@ public class TraductionLogic : MonoBehaviour
         }
         else
         {
-            if (isOnRange(enemy) && enemy.activeSelf && enemy.layer == player.layer)
+            // Si el enemigo está lo suficientemente cerca, el enemigo está activo, el personaje y el enemigo están en la misma capa y el personaje no es invisible, se activa la muerte
+            if (isOnRange(enemy) && enemy.activeSelf && enemy.layer == player.layer && !isInvisible)
             {
                 NaeveDeath();
             }
@@ -447,24 +449,61 @@ public class TraductionLogic : MonoBehaviour
         obj.transform.position = target;
     }
     // Vuelve invisible al objeto paulatinamente
+    //private void InvisibleTarget(GameObject obj)
+    //{
+    //    // Obtenemos el renderer del objeto
+    //    Renderer objectRenderer = obj.GetComponent<Renderer>();
+    //    // Lerp (interpolación lineal) entre la transparencia actual y 0 (totalmente transparente)
+    //    float currentTransparency = objectRenderer.material.color.a;
+    //    float newTransparency = Mathf.Lerp(currentTransparency, 0.02f, fadeSpeed * Time.deltaTime);
+    //    // Actualiza el color del material con la nueva transparencia
+    //    Color newColor = objectRenderer.material.color;
+    //    newColor.a = newTransparency;
+    //    objectRenderer.material.color = newColor;
+
+    //    if (newTransparency <= invisibleValue)
+    //    {
+    //        invisible = false;
+    //        objectInvisible = null;
+    //    }
+    //}
+
     private void InvisibleTarget(GameObject obj)
     {
-        // Obtenemos el renderer del objeto
-        Renderer objectRenderer = obj.GetComponent<Renderer>();
-        // Lerp (interpolación lineal) entre la transparencia actual y 0 (totalmente transparente)
-        float currentTransparency = objectRenderer.material.color.a;
-        float newTransparency = Mathf.Lerp(currentTransparency, 0.02f, fadeSpeed * Time.deltaTime);
-        // Actualiza el color del material con la nueva transparencia
-        Color newColor = objectRenderer.material.color;
-        newColor.a = newTransparency;
-        objectRenderer.material.color = newColor;
-
-        if (newTransparency <= invisibleValue)
+        // Busca el objeto hijo "Skeletal"
+        UnityEngine.Transform skeletal = obj.transform.Find("Skeletal");
+        if (skeletal == null)
         {
-            invisible = false;
-            objectInvisible = null;
+            Debug.LogError("No se encontró el objeto hijo 'Skeletal'");
+            return;
+        }
+
+        // Itera sobre todos los hijos de "Skeletal"
+        foreach (UnityEngine.Transform child in skeletal)
+        {
+            // Obtiene el renderer del hijo actual
+            Renderer childRenderer = child.GetComponent<Renderer>();
+            if (childRenderer != null)
+            {
+                // Lerp (interpolación lineal) entre la transparencia actual y 0 (totalmente transparente)
+                float currentTransparency = childRenderer.material.color.a;
+                float newTransparency = Mathf.Lerp(currentTransparency, 0.02f, fadeSpeed * Time.deltaTime);
+
+                // Actualiza el color del material con la nueva transparencia
+                Color newColor = childRenderer.material.color;
+                newColor.a = newTransparency;
+                childRenderer.material.color = newColor;
+
+                if (newTransparency <= invisibleValue)
+                {
+                    invisible = false;
+                    objectInvisible = null;
+                    isInvisible = true;
+                }
+            }
         }
     }
+
     private void Jump(Rigidbody2D rb)
     {
         if (IsGrounded() & !naeveAnimator.GetBool("isJump")) // Asegura que el jugador esté en el suelo antes de saltar y que no está la animación ya activada
@@ -544,26 +583,31 @@ public class TraductionLogic : MonoBehaviour
         chatController.AppendMessage(chatReply);
         chatController.UpdateGPT();
         // Si el NPC es el portón buscamos la cadena "[Abierta]"
-        if (chatController == portonControllerGPT)
+        // Si es el primer mensaje no busco las key por si al GPT se le va la olla y decide contestar con el comando para explicarse. (Ha pasado muchas veces)
+        if (!chatController.GetFirstMsg())
         {
-            GetPortonKey(chatReply);
+            if (chatController == portonControllerGPT)
+            {
+                GetPortonKey(chatReply);
+            }
+            else if (chatController == estatuaControllerGPT)
+            {
+                GetEstatuaKey(chatReply);
+            }
+            else if (chatController == quimeraControllerGPT)
+            {
+                GetQuimeraKey(chatReply);
+            }
+            else if (chatController == loboControllerGPT)
+            {
+                GetLoboKey(chatReply);
+            }
+            else if (chatController == guardaControllerGPT)
+            {
+                GetGuardaKey(chatReply);
+            }
         }
-        else if (chatController == estatuaControllerGPT)
-        {
-            GetEstatuaKey(chatReply);
-        }
-        else if (chatController == quimeraControllerGPT)
-        {
-            GetQuimeraKey(chatReply);
-        }
-        else if (chatController == loboControllerGPT)
-        {
-            GetLoboKey(chatReply);
-        }
-        else if (chatController == guardaControllerGPT)
-        {
-            GetGuardaKey(chatReply);
-        }
+        
         chatReply = "";
     }
 
@@ -1120,12 +1164,12 @@ public class TraductionLogic : MonoBehaviour
                 {
                     msg += item;
                 }
-                buildOtherMsg(msg);
+                //buildOtherMsg(msg);
             }
             else
             {
                 string sendMsg = "Estás muy lejos del objeto. Muévete cerca del objeto antes";
-                buildOtherMsg(sendMsg);
+                //buildOtherMsg(sendMsg);
                 Debug.Log("Acercate al objeto antes");
             }
         }
@@ -1214,14 +1258,21 @@ public class TraductionLogic : MonoBehaviour
         if (match.Success)
         {
             Debug.Log("Puedes continuar tu camino!");
-            Invoke("DesactivarQuimera", 10f); // Llama al método DesactivarQuimera después de 5 segundos
+            Invoke("DesactivarQuimera", 5f); // Llama al método DesactivarQuimera después de 5 segundos
         }
     }
 
     void DesactivarQuimera()
-    {
-        Instantiate(teleportVFX, quimera.transform.position + Vector3.up * 4.0f, Quaternion.identity);
-        quimera.SetActive(false); // Desactiva el GameObject quimera
+    {      
+        TalkButtonController buttonQuimera = quimera.GetComponent<TalkButtonController>();
+        if (buttonQuimera != null)
+        {
+            Instantiate(teleportVFX, quimera.transform.position + Vector3.up * 4.0f, Quaternion.identity);
+            buttonQuimera.Deactive();
+            quimeraControllerGPT = null;
+            quimera.SetActive(false); // Desactiva el GameObject quimera
+        }
+        
     }
 
     public void GetLoboKey(string message)

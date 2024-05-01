@@ -4,9 +4,9 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     private float baseSpeed = 2f;
-    private float targetSpeed = 8f; // Velocidad máxima (cuatriplicada)
+    private float targetSpeed = 7f; // Velocidad máxima (cuatriplicada)
     private float currentSpeed;
-    private float accelerationTime = 10f; // Tiempo en segundos para acelerar
+    private float accelerationTime = 15f; // Tiempo en segundos para acelerar
     private float accelerationTimer = 0f;
     private Vector2 target;
 
