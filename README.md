@@ -4,7 +4,7 @@ El repositorio creado inicialmente por Alberto está aquí: https://github.com/A
 
 Manual de instalación y uso:
 
-El repositorio es un proyecto de Unity, por lo que bastrá con importarlo en Unity y ejecutarlo.
+El repositorio es un proyecto de Unity, por lo que bastará con importarlo en Unity y ejecutarlo.
 
 Este TFG es una herramienta en forma de videojuego narrativo cuyos comportamientos están ligados a ChatGPT mediante una comunicación a través de la API.
 
