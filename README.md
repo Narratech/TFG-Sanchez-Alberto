@@ -8,7 +8,7 @@ El repositorio es un proyecto de Unity, por lo que bastará con importarlo en Un
 
 Este TFG es una herramienta en forma de videojuego narrativo cuyos comportamientos están ligados a ChatGPT mediante una comunicación a través de la API.
 
-Se podrá cambiar la versión de ChatGPT en el script GPTController, dentro de la función SendReply(), modificando la opción Model. Justo debajo podrá modificarse también la temperatura, un número entre 0.0f y 1.0f. Cuanta más temperatura más creatividad del modelo, aunque más tendencia a la alucinación. Según el ejemplar de ChatGPT en el que se configure se necesitará una temperatura más alta o más baja. Los parámetros por defecto se encuentran en la función start: 
+Se podrá cambiar la versión de ChatGPT en el script "GPTController", dentro de la función "SendReply()", modificando la opción Model. Justo debajo podrá modificarse también la temperatura, un número entre 0.0f y 1.0f. Cuanta más temperatura más creatividad del modelo, aunque más tendencia a la alucinación. Según el ejemplar de ChatGPT en el que se configure se necesitará una temperatura más alta o más baja. Los parámetros por defecto se encuentran en la función start: 
 
 private void Start()
         {
