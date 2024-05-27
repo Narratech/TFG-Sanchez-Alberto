@@ -4,7 +4,6 @@ El repositorio creado inicialmente por Alberto está aquí: https://github.com/A
 
 Manual de instalación y uso:
 
-Setting Up Your OpenAI Account
 To use the OpenAI API, you need to have an OpenAI account. Follow these steps to create an account and generate an API key:
 
 Go to https://openai.com/api and sign up for an account
