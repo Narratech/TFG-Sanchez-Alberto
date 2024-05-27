@@ -4,6 +4,30 @@ El repositorio creado inicialmente por Alberto está aquí: https://github.com/A
 
 Manual de instalación y uso:
 
+Setting Up Your OpenAI Account
+To use the OpenAI API, you need to have an OpenAI account. Follow these steps to create an account and generate an API key:
+
+Go to https://openai.com/api and sign up for an account
+Once you have created an account, go to https://beta.openai.com/account/api-keys
+Create a new secret key and save it
+Saving Your Credentials
+To make requests to the OpenAI API, you need to use your API key and organization name (if applicable). To avoid exposing your API key in your Unity project, you can save it in your device's local storage.
+
+To do this, follow these steps:
+
+Create a folder called .openai in your home directory (e.g. C:User\UserName\ for Windows or ~\ for Linux or Mac)
+Create a file called auth.json in the .openai folder
+Add an api_key field and a organization field (if applicable) to the auth.json file and save it
+Here is an example of what your auth.json file should look like:
+{
+    "api_key": "sk-...W6yi",
+    "organization": "org-...L7W"
+}
+You can also pass your API key into OpenAIApi ctor when creating an instance of it but again, this is not recommended!
+
+var openai = new OpenAIApi("sk-Me8...6yi");
+IMPORTANT: Your API key is a secret. Do not share it with others or expose it in any client-side code (e.g. browsers, apps). If you are using OpenAI for production, make sure to run it on the server side, where your API key can be securely loaded from an environment variable or key management service.
+
 El repositorio es un proyecto de Unity, por lo que bastará con importarlo en Unity y ejecutarlo.
 
 Este TFG es una herramienta en forma de videojuego narrativo cuyos comportamientos están ligados a ChatGPT mediante una comunicación a través de la API.
